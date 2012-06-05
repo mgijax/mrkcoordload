@@ -1,0 +1,232 @@
+#format: sh
+#
+#  Configuration for mrkcoordload
+#
+#  This file sets up environment variables that are needed for a Coordinate load
+#
+###########################################################################
+
+#
+#  If the MGICONFIG environment variable does not have a local override,
+#  use the default "live" settings.
+#
+if [ "${MGICONFIG}" = "" ]
+then
+    MGICONFIG=/usr/local/mgi/live/mgiconfig
+    export MGICONFIG
+fi
+
+CONFIG_MASTER=${MGICONFIG}/master.config.sh
+
+export CONFIG_MASTER
+
+. ${CONFIG_MASTER}
+
+##########################################################################
+#
+#  JAVA SETTINGS
+#
+###########################################################################
+
+JAVARUNTIMEOPTS="-Xms1500m -Xmx1500m"
+
+JAVA_LIB=${MGI_JAVALIB}/core.jar:${MGI_JAVALIB}/dbsmgd.jar:${MGI_JAVALIB}/lib_java_dbsrdr/dbsrdr.jar:${MGI_JAVALIB}/dla.jar
+
+CLASSPATH=.:${JAVA_LIB}:${COMMON_CLASSPATH}
+
+export JAVARUNTIMEOPTS JAVA_LIB CLASSPATH
+
+
+###########################################################################
+#
+#  LOAD SPECIFIC SETTINGS
+#
+###########################################################################
+
+#
+# output file settings
+#
+
+# Full path the the logs, reports, and archive directories 
+FILEDIR=/data/loads/mgi/mrkcoordload
+
+# Full path to the input, output, logs, reports and archive directories.
+#
+INPUTDIR=${FILEDIR}/input
+LOGDIR=${FILEDIR}/logs
+RPTDIR=${FILEDIR}/reports
+OUTPUTDIR=${FILEDIR}/output
+ARCHIVEDIR=${FILEDIR}/archive
+
+export INPUTDIR FILEDIR LOGDIR RPTDIR OUTPUTDIR ARCHIVEDIR
+
+#
+# input file settings
+#
+
+# Complete path name of the curated marker coordload input file (the 
+# file we parse into separate files by collection)
+INPUT_FILE="${INPUTDIR}/mrkcoordload.txt"
+
+#  Complete path name of a coordinate load input file. The
+# wrapper script will set suffix for each individual load by collection
+# e.g. INFILE_NAME=${INFILE_NAME}.qtl export INFILE_NAME
+INFILE_NAME="${INPUTDIR}/mrkcoordload" 
+
+# Complete path to the file listing all the coordinate load input files
+COORD_FILES="${INPUTDIR}/coordinateFileList.txt"
+
+export INPUT_FILE INFILE_NAME COORD_FILES
+
+
+#
+# general settings
+#
+#  Java applications
+DLA_LOADER=org.jax.mgi.shr.dla.loader.coord.CoordLoader
+DLA_START=org.jax.mgi.shr.dla.loader.DLAStart
+COORD_INTERPRETER=org.jax.mgi.shr.dla.input.mgs.MGSCoordinateFormatInterpreter
+COORD_PROCESSOR=org.jax.mgi.dbs.mgd.loads.Coord.ChromosomeCoordMapProcessor
+
+export DLA_LOADER DLA_START COORD_INTERPRETER COORD_PROCESSOR
+
+# SQL STREAM
+DLA_LOAD_STREAM=org.jax.mgi.shr.dbutils.dao.BCP_Stream
+DLA_RADAR_STREAM=org.jax.mgi.shr.dbutils.dao.BCP_Stream
+
+# prefix of Configuration variable names for the load database
+# e.g. prefixes DBSERVER, DBNAME, BCP_PATH, etc
+DLA_DB_PREFIX=MGD
+
+export DLA_LOAD_STREAM DLA_RADAR_STREAM DLA_DB_PREFIX
+
+# turn off searches for associated clones in the MSProcessor
+MS_OK_TO_SEARCH_ASSOC_CLONES=false
+
+export MS_OK_TO_SEARCH_ASSOC_CLONES
+
+#  Complete path name of the log files
+LOG_PROC=${LOGDIR}/mrkcoordload.proc.log
+LOG_DIAG=${LOGDIR}/mrkcoordload.diag.log
+LOG_CUR=${LOGDIR}/mrkcoordload.cur.log
+LOG_VAL=${LOGDIR}/mrkcoordload.val.log
+
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL
+
+# Send debug messages to the diagnostic log
+LOG_DEBUG=false
+DBDEBUG=false
+CACHE_DEBUG=false
+
+# log factory class so classes can get their own logger
+LOG_FACTORY=org.jax.mgi.shr.dla.log.DLALoggerFactory
+
+export LOG_DEBUG DBDEBUG CACHE_DEBUG LOG_FACTORY
+
+# this load's login value for DB table CreatedBy and ModifiedBy
+JOBSTREAM=mrk_coordload
+
+export JOBSTREAM
+
+# add or delete_reload
+COORD_LOAD_MODE=reload_by_object
+
+export COORD_LOAD_MODE
+
+# logical db name for this data provider
+# always MGI for markers
+COORD_LOGICALDB=MGI
+
+# MGI type name of the feature, always Marker
+COORD_FEATURE_MGITYPE=Marker
+
+# name of organism 
+COORD_ORGANISM="mouse, laboratory"
+
+# version of the  assembly the coordinates are based on
+# e.g. "NCBI Build 36"
+# this will be set by wrapper from input file now
+#COORD_VERSION=...
+
+export COORD_LOGICALDB COORD_FEATURE_MGITYPE COORD_ORGANISM 
+
+# coordinate map collection to which this load belongs
+# e.g. "MGI QTL"
+# this will be set by the wrapper for each collection
+# file it invokes
+#COORD_COLLECTION_NAME=...
+
+# abbreviation for the coordinate collection
+# if no value assigned will be same as COORD_COLLECTION
+COORD_COLLECTION_ABBREV=
+
+# coordinate map type
+COORD_TYPE=Assembly
+
+# the coordinate map units
+COORD_UNITS="base pair"
+
+export COORD_COLLECTION_NAME COORD_COLLECTION_ABBREV COORD_TYPE
+export COORD_UNITS 
+
+# full path to coordinate repeat file
+COORD_REPEAT_FILE=${OUTPUTDIR}/coordrepeats.out
+
+export COORD_REPEAT_FILE
+
+# okay to load multiple coordinates per object?
+COORD_REPEATS_OK=false
+
+export COORD_REPEATS_OK
+
+###########################################################################
+#
+#  BCP MANAGER SETTINGS BY DATABASE
+#
+###########################################################################
+
+#  Settings used to create a BCP manager for the MGD database
+MGD_BCP_PATH=${OUTPUTDIR}
+MGD_BCP_PREVENT_EXECUTE=false
+MGD_BCP_TRUNCATE_LOG=true
+MGD_BCP_DROP_INDEXES=false
+MGD_BCP_RECORD_STAMPING=false
+MGD_BCP_AUTO_FLUSH=false
+MGD_BCP_OK_TO_OVERWRITE=false
+
+export MGD_BCP_PATH MGD_BCP_PREVENT_EXECUTE MGD_BCP_TRUNCATE_LOG
+export MGD_BCP_DROP_INDEXES MGD_BCP_RECORD_STAMPING MGD_BCP_AUTO_FLUSH
+export MGD_BCP_OK_TO_OVERWRITE
+
+#  Settings used to create a BCP manager for the MGD database
+RADAR_BCP_PATH=${OUTPUTDIR}
+RADAR_BCP_PREVENT_EXECUTE=false
+RADAR_BCP_TRUNCATE_LOG=true
+RADAR_BCP_DROP_INDEXES=false
+RADAR_BCP_RECORD_STAMPING=false
+RADAR_BCP_AUTO_FLUSH=false
+RADAR_BCP_OK_TO_OVERWRITE=false
+
+export RADAR_BCP_PATH RADAR_BCP_PREVENT_EXECUTE RADAR_BCP_TRUNCATE_LOG
+export RADAR_BCP_DROP_INDEXES RADAR_BCP_RECORD_STAMPING RADAR_BCP_AUTO_FLUSH
+export RADAR_BCP_OK_TO_OVERWRITE
+
+###########################################################################
+#
+#  MISCELLANEOUS SETTINGS
+#
+###########################################################################
+#  The name of the load for the subject of an email notification
+# will be set by wrapper based on collection for each load
+MAIL_LOADNAME="Marker Coordinate Load"
+
+#  Recipient list for mailing the curation log file (comma-separated)
+MAIL_LOG_CUR=""
+
+export MAIL_LOADNAME MAIL_LOG_CUR
+
+#  INSTALLDIR expected by dlautils/DLAInstall
+INSTALLDIR=${MRKCOORDLOAD}
+
+export INSTALLDIR
+
