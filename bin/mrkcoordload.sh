@@ -9,7 +9,6 @@
 #     mrkcoordload.sh
 #
 
-
 cd `dirname $0`
 LOG=`pwd`/createInputFiles.log
 rm -rf ${LOG}
@@ -161,7 +160,7 @@ checkStatus ${STAT} "${MRKCOORDLOAD}/bin/createInputFiles.py"
 # run the coordload
 #
 
-for f in `cat /data/loads/mgi/mrkcoordload/input/coordinateFileList.txt` # | cut -d. -f2`
+for f in `cat ${COORD_FILES}`
 do
     echo $f
     # these env variable names expected by java coordload
