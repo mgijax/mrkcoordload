@@ -89,7 +89,8 @@ def readInput():
 	print 'r: %s' % r
 	# create list of columns
 	columnList = r.split(TAB)
-
+	if len(columnList) < 5:
+	    sys.exit ('error in input line: %s' % r)
 	# get the collection name
 	collection = columnList[5].strip()
 	print 'collection: %s' % collection
