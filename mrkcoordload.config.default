@@ -48,7 +48,7 @@ export JAVARUNTIMEOPTS JAVA_LIB CLASSPATH
 #
 
 # Full path the the logs, reports, and archive directories 
-FILEDIR=/data/loads/mgi/mrkcoordload
+FILEDIR=${DATALOADSOUTPUT}/mgi/mrkcoordload
 
 # Full path to the input, output, logs, reports and archive directories.
 #
