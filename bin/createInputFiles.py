@@ -18,6 +18,7 @@
 	4. end coordinate
 	5. strand
 	6. collection name
+	7. collection abbreviation
 
   Outputs: tab delimited files in coordload format, one for each collection
         1. MGI ID 
@@ -68,7 +69,7 @@ coordFileListFile = os.environ['COORD_FILES']
 
 # mapping of collections to their rows of coordinates
 
-# {collection  name: [list of coordload format rows], ...}
+# {collection  name~collection abbrev: [list of coordload format rows], ...}
 inputDict = {}
 
 # the set of collections found in 'inputFile'
@@ -89,17 +90,19 @@ def readInput():
 	print 'r: %s' % r
 	# create list of columns
 	columnList = r.split(TAB)
-	if len(columnList) < 5:
+	if len(columnList) < 6:
 	    sys.exit ('error in input line: %s' % r)
 	# get the collection name
 	collection = columnList[5].strip()
-	print 'collection: %s' % collection
-	# remove the collection column from the list
-	columnList = columnList[:-1]
+	abbrev = columnList[6].strip()
+	key = '%s~%s' % (collection, abbrev)
+	print 'col/abbrev key: %s' % key
+	# remove the collection and abbrev columns from the list
+	columnList = columnList[:-2]
 
-	if not inputDict.has_key(collection):
-	    inputDict[collection] = []
-	inputDict[collection].append(columnList)
+	if not inputDict.has_key(key):
+	    inputDict[key] = []
+	inputDict[key].append(columnList)
 
     # get the set of collections found in the input file
     collectionList = inputDict.keys()
@@ -110,7 +113,7 @@ def writeFiles():
 	print 'Cannot open output file: %s ' % coordFileListFile
 	sys.exit(1)
     for c in collectionList:
-	# e.g. mrkcoordload.MGI QTL
+	# e.g. c: MGI QTL~MGI
 	suffix = c.replace(' ', '_')
 	fileName = '%s.%s' % (coordFileRoot, suffix)
 	print 'fileName: %s' % fileName

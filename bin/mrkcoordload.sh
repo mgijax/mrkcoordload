@@ -120,24 +120,17 @@ echo 'get coordinate version'
 save=$IFS
 IFS=';'
 export IFS
-echo "IFS: $IFS"
 echo ${INPUT_FILE}
-echo `cat ${INPUT_FILE} | line `
 for l in `cat ${INPUT_FILE} | line`
 do
-    echo $l
     key=`echo $l | cut -d= -f1`
-    echo $key
     value=`echo $l | cut -d= -f2`
-    echo $value
     if [ $key = 'build' ] ; then
         COORD_VERSION=$value
         export COORD_VERSION
-        echo "COORD_VERSION: $COORD_VERSION"
     elif [ $key = 'strain' ] ; then
         STRAIN=$value
         export STRAIN
-        echo "STRAIN: $STRAIN"
     else
         echo 'unrecognized key'
     fi
@@ -162,18 +155,19 @@ checkStatus ${STAT} "${MRKCOORDLOAD}/bin/createInputFiles.py"
 
 for f in `cat ${COORD_FILES}`
 do
-    echo $f
     # these env variable names expected by java coordload
     # replace '_' with ' ' e.g. NCBI_UniSTS -> NCBI UniSTS
     suffix=`echo $f | cut -d. -f2`
-    echo $suffix
-    COORD_COLLECTION_NAME=`echo $suffix | sed 's/\_/ /g'`
+    collection=`echo $suffix | cut -d~ -f1`
+    abbrev=`echo $suffix | cut -d~ -f2`
+    echo "abbrev ${abbrev}"
+    COORD_COLLECTION_NAME=`echo $collection | sed 's/\_/ /g'`
     export COORD_COLLECTION_NAME
-    echo ${COORD_COLLECTION_NAME}
+    COORD_COLLECTION_ABBREV=`echo $abbrev | sed 's/\_/ /g'`
+    export COORD_COLLECTION_ABBREV
 
     INFILE_NAME=$f
     export INFILE_NAME
-    echo ${INFILE_NAME}
     if [ ! -r ${INFILE_NAME} ]
     then
         # set STAT for endJobStream.py
@@ -183,12 +177,12 @@ do
     
     MAIL_LOADNAME="${COORD_COLLECTION_NAME}, ${MAIL_LOADNAME}"
     export MAIL_LOADNAME
-    echo ${MAIL_LOADNAME}
 
     echo "Running ${COORD_COLLECTION_NAME} mrkcoordload" | tee -a ${LOG_DIAG} ${LOG_PROC}
     ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
         -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD} \
 	-DCOORD_COLLECTION_NAME="${COORD_COLLECTION_NAME}" \
+	-DCOORD_COLLECTION_ABBREV="${COORD_COLLECTION_ABBREV}" \
 	-DINFILE_NAME=${INFILE_NAME} \
 	-DCOORD_VERSION="${COORD_VERSION}" \
         -DJOBKEY=${JOBKEY} ${DLA_START}
