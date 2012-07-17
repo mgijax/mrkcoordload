@@ -85,9 +85,9 @@ def readInput():
 	print 'Cannot open input file: %s ' % inputFile
 	sys.exit(1)
     junk = fpInput.readline()
-    print 'junk: %s' % junk
+    #print 'junk: %s' % junk
     for r in fpInput.readlines():
-	print 'r: %s' % r
+	#print 'r: %s' % r
 	# create list of columns
 	columnList = r.split(TAB)
 	if len(columnList) < 6:
@@ -96,7 +96,7 @@ def readInput():
 	collection = columnList[5].strip()
 	abbrev = columnList[6].strip()
 	key = '%s~%s' % (collection, abbrev)
-	print 'col/abbrev key: %s' % key
+	#print 'col/abbrev key: %s' % key
 	# remove the collection and abbrev columns from the list
 	columnList = columnList[:-2]
 
@@ -116,7 +116,7 @@ def writeFiles():
 	# e.g. c: MGI QTL~MGI
 	suffix = c.replace(' ', '_')
 	fileName = '%s.%s' % (coordFileRoot, suffix)
-	print 'fileName: %s' % fileName
+	#print 'fileName: %s' % fileName
 	try:
 	    fp2 = open(fileName, 'w')
 	except:
