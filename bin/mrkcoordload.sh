@@ -13,6 +13,8 @@ cd `dirname $0`
 LOG=`pwd`/createInputFiles.log
 rm -rf ${LOG}
 
+RUNTYPE=live
+
 #
 #  Verify the argument(s) to the shell script.
 #
@@ -103,7 +105,7 @@ cleanDir ${OUTPUTDIR}
 LASTRUN_FILE=${INPUTDIR}/lastrun
 #if [ -f ${LASTRUN_FILE} ]
 #then
-#    if /usr/local/bin/test ${LASTRUN_FILE} -nt ${INPUT_FILE}
+#    if /usr/local/bin/test ${LASTRUN_FILE} -nt ${INPUT_FILE_DEFAULT}
 #    then
 #
 #        echo "Input file has not been updated - skipping load" | tee -a ${LOG_PROC}
@@ -115,15 +117,34 @@ LASTRUN_FILE=${INPUTDIR}/lastrun
 #    fi
 #fi
 
+#
+# Generate the sanity/QC reports
+#
+#echo "" >> ${LOG_DIAG}
+#date >> ${LOG_DIAG}
+#echo "Generate the sanity/QC reports" | tee -a ${LOG_DIAG}
+#${LOAD_QC_SH} ${INPUT_FILE_DEFAULT} ${RUNTYPE} 2>&1 >> ${LOG_DIAG}
+#STAT=$?
+#checkStatus ${STAT} "QC reports"
+#if [ ${STAT} -eq 1 ]
+#then
+#    shutDown
+#    exit 1
+#fi
+
 # get the coordinate version
-echo 'get coordinate version'
 save=$IFS
 IFS=';'
 export IFS
-echo ${INPUT_FILE}
-for l in `cat ${INPUT_FILE} | line`
+
+## We will want to update INPUT_FILE_DEFAULT to INPUT_FILE_LOAD
+## when we are ready to run the qC reports from the load
+# Iterate thru tokens on first line delimited by IFS
+for l in `cat ${INPUT_FILE_DEFAULT} | line`
 do
-    key=`echo $l | cut -d= -f1`
+    # get key in lower case
+    key=`echo $l | cut -d= -f1 | /usr/local/bin/tr 'A-Z' 'a-z'`
+    # get value as is
     value=`echo $l | cut -d= -f2`
     if [ $key = 'build' ] ; then
         COORD_VERSION=$value
@@ -131,13 +152,10 @@ do
     elif [ $key = 'strain' ] ; then
         STRAIN=$value
         export STRAIN
-    else
-        echo 'unrecognized key'
     fi
 done
 
 IFS=$save
-echo "IFS: $IFS"
 
 #
 # create input files
@@ -160,7 +178,6 @@ do
     suffix=`echo $f | cut -d. -f2`
     collection=`echo $suffix | cut -d~ -f1`
     abbrev=`echo $suffix | cut -d~ -f2`
-    echo "abbrev ${abbrev}"
     COORD_COLLECTION_NAME=`echo $collection | sed 's/\_/ /g'`
     export COORD_COLLECTION_NAME
     COORD_COLLECTION_ABBREV=`echo $abbrev | sed 's/\_/ /g'`

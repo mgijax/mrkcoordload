@@ -43,10 +43,6 @@ export JAVARUNTIMEOPTS JAVA_LIB CLASSPATH
 #
 ###########################################################################
 
-#
-# output file settings
-#
-
 # Full path the the logs, reports, and archive directories 
 FILEDIR=${DATALOADSOUTPUT}/mgi/mrkcoordload
 
@@ -60,23 +56,87 @@ ARCHIVEDIR=${FILEDIR}/archive
 
 export INPUTDIR FILEDIR LOGDIR RPTDIR OUTPUTDIR ARCHIVEDIR
 
-#
-# input file settings
-#
-
-# Complete path name of the curated marker coordload input file (the 
+# Full path name of the curated marker coordload input file (the 
 # file we parse into separate files by collection)
-INPUT_FILE="${INPUTDIR}/mrkcoordload.txt"
+INPUT_FILE_DEFAULT="${INPUTDIR}/mrkcoordload.txt"
 
-#  Complete path name of a coordinate load input file. The
+# Full path to the "cleaned up" QC-ready input file that is created and used
+# by the sanity/QC report script.
+#
+INPUT_FILE_QC=${OUTPUTDIR}/mrkcoordload_qc.txt
+
+export INPUT_FILE_DEFAULT INPUT_FILE_QC
+
+# Full path to the load-ready coordinate file that is
+# created by the sanity/QC report script and used as input 
+# to the marker coordinate load
+#
+INPUT_FILE_LOAD=${OUTPUTDIR}/mrkcoordload_load.txt
+
+export INPUT_FILE_LOAD
+
+# Full path to the bcp file for loading the input file into the temp table.
+#
+INPUT_FILE_BCP=${OUTPUTDIR}/mrkcoordload_temp.bcp
+
+export INPUT_FILE_BCP
+
+# Full path to the  sanity/QC log.
+#
+MRKCOORDQC_LOGFILE=${LOGDIR}/mrkcoordQC.log
+
+export MRKCOORDQC_LOGFILE
+
+# Temp table that will be loaded from the input files.
+#
+TEMP_TABLE=mrkcoord_temp
+
+export TEMP_TABLE
+
+# Full path to the sanity/QC reports.
+#
+SANITY_RPT=${RPTDIR}/sanity.rpt
+INVALID_MARKER_RPT=${RPTDIR}/invalid_marker.rpt
+SEC_MARKER_RPT=${RPTDIR}/secondary_marker.rpt
+RPT_NAMES_RPT=${RPTDIR}/reportsWithDiscrepancies.rpt
+CHR_DISCREP_RPT=${RPTDIR}/chr_discrep.rpt
+INVALID_COORD_STRAND_RPT=${RPTDIR}/invalid_coord_strand.rpt
+SOURCE_DISPLAY_RPT=${RPTDIR}/source_display.rpt
+BUILD_RPT=${RPTDIR}/build.rpt
+
+export SANITY_RPT  INVALID_MARKER_RPT SEC_MARKER_RPT RPT_NAMES_RPT
+export CHR_DISCREP_RPT INVALID_COORD_STRAND_RPT
+export SOURCE_DISPLAY_RPT BUILD_RPT
+
+# Number of columns expected for the input file (for sanity check).
+#
+MRKCOORD_FILE_COLUMNS=7
+
+export MRKCOORD_FILE_COLUMNS
+
+
+# Temp table that will be loaded from the input file.
+#
+MRKCOORD_TEMP_TABLE=MRKCoordLoad
+
+export MRKCOORD_TEMP_TABLE
+
+# Full path to QC/sanity scripts.
+#
+LOAD_QC=${MRKCOORDLOAD}/bin/mrkcoordQC.py
+LOAD_QC_SH=${MRKCOORDLOAD}/bin/mrkcoordQC.sh
+
+export LOAD_QC LOAD_QC_SH
+
+#  Full path name of a coordinate load input file. The
 # wrapper script will set suffix for each individual load by collection
 # e.g. INFILE_NAME=${INFILE_NAME}.qtl export INFILE_NAME
 INFILE_NAME="${INPUTDIR}/mrkcoordload" 
 
-# Complete path to the file listing all the coordinate load input files
+# Full path to the file listing all the coordinate load input files
 COORD_FILES="${INPUTDIR}/coordinateFileList.txt"
 
-export INPUT_FILE INFILE_NAME COORD_FILES
+export INFILE_NAME COORD_FILES
 
 
 #
@@ -105,7 +165,7 @@ MS_OK_TO_SEARCH_ASSOC_CLONES=false
 
 export MS_OK_TO_SEARCH_ASSOC_CLONES
 
-#  Complete path name of the log files
+#  Full path name of the log files
 LOG_PROC=${LOGDIR}/mrkcoordload.proc.log
 LOG_DIAG=${LOGDIR}/mrkcoordload.diag.log
 LOG_CUR=${LOGDIR}/mrkcoordload.cur.log

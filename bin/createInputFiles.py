@@ -58,7 +58,9 @@ TAB = '\t'
 CRT = '\n'
 
 # curated marker coordinate file
-inputFile = os.environ['INPUT_FILE']
+## Change INPUT_FILE_DEFAULT to INPUT_FILE_LOAD
+## when we start running QC checks from the load
+inputFile = os.environ['INPUT_FILE_DEFAULT']
 print 'inputFile: %s' % inputFile
 
 # root filepath for coordload files by collection

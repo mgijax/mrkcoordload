@@ -1,3 +1,22 @@
+TAG: mrkcoordload-5-0-0-3
+DATE: 7/26/2012
+STAFF: sc
+RELEASE: dev
+CHANGES: US#3 dn US#11
+1. Added checkColumns.py, mrkcoordQC.py, mrkcoordQC.sh
+    runMrkCoordQC
+    Note that mrkcoordQC.py will need to keep track of good
+	lines (not rejected because of QC errrors) and write out
+	to a load ready file when we run QC from the load 
+2. mrkcoordload.sh - Added RUNTYPE=live default, Added commented
+	out code to support running QC from the load
+	Added case insensitivity for determining build
+	Added commented out code to deal with last run file
+	Changed config value of input file - will need to do again
+	  when we run QC from the load
+3. createInputFiles.py - changed config value of input file
+4. mrkcoordload.config.default - added config to support QC
+
 TAG: mrkcoordload-5-0-0-2
 DATE: 6/5/2012
 STAFF: sc
