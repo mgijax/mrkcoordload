@@ -19,8 +19,9 @@ usage ()
     exit 1
 }
 
-#MRKCOORDLOADDIR=/usr/local/mgi/scrum-bob/dataload/mrkcoordload
-MRKCOORDLOADDIR=/home/sc/work/dataload/mrkcoordload
+#MRKCOORDLOADDIR=/usr/local/mgi/live/dataload/mrkcoordload
+MRKCOORDLOADDIR=/usr/local/mgi/scrum-bob/dataload/mrkcoordload
+#MRKCOORDLOADDIR=/home/sc/work/dataload/mrkcoordload
 WRAPPER=${MRKCOORDLOADDIR}/bin/mrkcoordQC.sh
 
 #
