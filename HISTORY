@@ -1,3 +1,4 @@
+TAG: mrkcoordload-5-0-0-4
 TAG: mrkcoordload-5-0-0-3
 DATE: 7/26/2012
 STAFF: sc
@@ -16,6 +17,9 @@ CHANGES: US#3 dn US#11
 	  when we run QC from the load
 3. createInputFiles.py - changed config value of input file
 4. mrkcoordload.config.default - added config to support QC
+5. Install - added permissions code for running QC scripts from
+	hobbiton and sym link input file creation to hobbiton
+	from lindon
 
 TAG: mrkcoordload-5-0-0-2
 DATE: 6/5/2012
