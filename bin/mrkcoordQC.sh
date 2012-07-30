@@ -276,7 +276,7 @@ checkColumns ()
     echo "\n\nLines With Missing Columns or Data" >> ${REPORT}
     echo "--------------------------" >> ${REPORT}
     ${MRKCOORDLOAD}/bin/checkColumns.py ${FILE} ${NUM_COLUMNS} > ${TMP_FILE}
-    cat ${TMP_FILE} >> ${REPORT}
+    cat ${TMP_FILE} >> ${REPORT} 
     if [ `cat ${TMP_FILE} | wc -l` -eq 0 ]
     then
         return 0
