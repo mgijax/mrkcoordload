@@ -804,6 +804,8 @@ def createSourceDisplayReport():
 #
 
 def createBuildReport():
+    global errorCount
+
     print 'Create the build report'
     fpBuildRpt.write(string.center('Build Report',110) + NL)
     fpBuildRpt.write(string.center('(' + timestamp + ')',110) + 2*NL)
