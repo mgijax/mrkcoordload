@@ -90,6 +90,7 @@ def openFile ():
 # Throws: Nothing
 #
 def checkColumns ():
+    #print 'starting checkColumns'
     global errors
     lineNum = 1
     header = fpInput.readline()
@@ -98,13 +99,14 @@ def checkColumns ():
 	lineNum = lineNum + 1
    	columns = string.split(line, TAB)
 	nc = len(columns) 
-	#print 'numColumns: %s columns: %s' % (nc, columns)
+	#print 'expected columns: %s actualColumns: %s columns: %s' % (numColumns, nc, columns)
 	if nc < numColumns:
 	    errors = errors + 1
 	    colError = colError + 1
 	### start code for missing data in req columns
 	# If errors then wrong number of columns exists; so continue to next
 	if colError > 0:
+	    print 'Missing Column(s): %s' % (columns)
 	    continue
 	# default
 	bad = 1
@@ -120,6 +122,7 @@ def checkColumns ():
         if bad == 1:
             print 'Missing Data in required column: %s' % (columns)
 	### end code for missing data in req columns
+    #print 'end checkColumns and errors is: %s' % errors
     return
 
 #
