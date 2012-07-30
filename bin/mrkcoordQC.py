@@ -785,13 +785,15 @@ def createSourceDisplayReport():
     print 'dbSourceList: %s' % dbSourceList
     print 'sourceDisplayList: %s' % sourceDisplayList
     for s in sourceDisplayList:
+	print 's: %s' % s
 	if s not in dbSourceList:
+	    print 'writing new source to report'
 	    fpSourceDisplayRpt.write('%s%s' % (s, NL))
 	    newSource += 1
     if newSource != 0:
 	errorReportNames.append(sourceDisplayRptFile + NL)
-    else:
-	fpSourceDisplayRpt.write('No new source/display in input' + NL)
+    #else:
+#	fpSourceDisplayRpt.write('No new source/display in input' + NL)
     return
 
 #
@@ -846,7 +848,7 @@ if liveRun == "1":
     print 'this is a live run'
 
 # always display the source/display report name
-fpRptNamesRpt.write(sourceDisplayRptFile + NL)
+#fpRptNamesRpt.write(sourceDisplayRptFile + NL)
 
 if errorCount > 0:
     names = string.join(errorReportNames,'' )
