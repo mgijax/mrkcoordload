@@ -96,25 +96,26 @@ def checkColumns ():
     for line in fpInput.readlines():
 	colError = 0
 	lineNum = lineNum + 1
-	columns = string.split(string.strip(line), TAB)
+   	columns = string.split(line, TAB)
 	nc = len(columns) 
+	#print 'numColumns: %s columns: %s' % (nc, columns)
 	if nc < numColumns:
-	    print 'numColumns: %s columns: %s' % (nc, columns)
 	    errors = errors + 1
 	    colError = colError + 1
 	### start code for missing data in req columns
 	# If errors then wrong number of columns exists; so continue to next
 	if colError > 0:
-	    print 'continueing'
 	    continue
 	# default
 	bad = 1
+	# transpose empty last column
+	if columns[6] == '\n':
+	    columns[6] = ''
         # strand is optional
         if columns[0] != '' and columns[1] != '' and columns[2] != '' and columns[3] != '' and columns[5] != '' and columns[6] != '':
             bad = 0
         # delete has only MGI ID, provider and display
         elif columns[0] != '' and columns[1] == '' and columns[2] == '' and columns[3] == '' and columns[4] == '' and columns[5] != '' and columns[6] != '' :
-	#elif columns[0] != '' and columns[5] != '' and columns[6] != '' :
             bad = 0
         if bad == 1:
             print 'Missing Data in required column: %s' % (columns)

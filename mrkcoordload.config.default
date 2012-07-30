@@ -100,12 +100,13 @@ INVALID_MARKER_RPT=${RPTDIR}/invalid_marker.rpt
 SEC_MARKER_RPT=${RPTDIR}/secondary_marker.rpt
 RPT_NAMES_RPT=${RPTDIR}/reportsWithDiscrepancies.rpt
 CHR_DISCREP_RPT=${RPTDIR}/chr_discrep.rpt
+INVALID_CHR_RPT=${RPTDIR}/invalid_chr.rpt
 INVALID_COORD_STRAND_RPT=${RPTDIR}/invalid_coord_strand.rpt
 SOURCE_DISPLAY_RPT=${RPTDIR}/source_display.rpt
 BUILD_RPT=${RPTDIR}/build.rpt
 
 export SANITY_RPT  INVALID_MARKER_RPT SEC_MARKER_RPT RPT_NAMES_RPT
-export CHR_DISCREP_RPT INVALID_COORD_STRAND_RPT
+export CHR_DISCREP_RPT INVALID_CHR_RPT INVALID_COORD_STRAND_RPT
 export SOURCE_DISPLAY_RPT BUILD_RPT
 
 # Number of columns expected for the input file (for sanity check).

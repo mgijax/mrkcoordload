@@ -23,6 +23,7 @@
 #          INVALID_MARKER_RPT
 #          SEC_MARKER_RPT
 #          CHR_DISCREP_RPT
+#	   INVALID_CHR_RPT
 #	   INVALID_COORD_STRAND_RPT
 #	   RPT_NAMES_RPT
 #
@@ -52,6 +53,8 @@
 #      - QC report (${SEC_MARKER_RPT})
 #
 #      - QC report (${CHR_DISCREP_RPT})
+#
+#      - QC report (${INVALID_CHR_RPT})
 #
 #      - QC report (${INVALID_COORD_STRAND_RPT})
 #
@@ -127,6 +130,7 @@ coordTempTable = os.environ['TEMP_TABLE']
 invMrkRptFile = os.environ['INVALID_MARKER_RPT']
 secMrkRptFile = os.environ['SEC_MARKER_RPT']
 chrDiscrepRptFile = os.environ['CHR_DISCREP_RPT']
+invChrRptFile =  os.environ['INVALID_CHR_RPT']
 invCoordStrandRptFile =  os.environ['INVALID_COORD_STRAND_RPT']
 sourceDisplayRptFile = os.environ['SOURCE_DISPLAY_RPT']
 buildRptFile = os.environ['BUILD_RPT']
@@ -139,6 +143,10 @@ sourceDisplayList = []
 
 # genome build value from the input
 build = ''
+
+# invalid chromosome list - don't do chromosome discrepancy
+# reporting on this list
+invChrList = ["' '"]
 
 timestamp = mgi_utils.date()
 
@@ -193,8 +201,10 @@ def init ():
 #
 def openFiles ():
     global fpCoord, fpCoordBCP
-    global fpInvMrkRpt, fpSecMrkRpt, fpChrDiscrepRpt, fpInvCoordStrandRpt
+    global fpInvMrkRpt, fpSecMrkRpt, fpChrDiscrepRpt, fpInvChrRpt
+    global fpInvCoordStrandRpt
     global fpSourceDisplayRpt, fpBuildRpt, fpRptNamesRpt
+
     #
     # Open the input files.
     #
@@ -232,6 +242,11 @@ def openFiles ():
         print 'Cannot open report file: ' + chrDiscrepRptFile
         sys.exit(1)
     try:
+	fpInvChrRpt = open(invChrRptFile, 'a')
+    except:
+        print 'Cannot open report file: ' + invChrRptFile
+        sys.exit(1)
+    try:
         fpInvCoordStrandRpt = open(invCoordStrandRptFile, 'a')
     except:
         print 'Cannot  open report file: ' + invCoordStrandRptFile
@@ -262,13 +277,14 @@ def openFiles ():
 # Throws: Nothing
 #
 def closeFiles ():
-    global fpCoord, fpInvMrkRpt, fpSecMrkRpt, fpChrDiscrepRpt
+    global fpCoord, fpInvMrkRpt, fpSecMrkRpt, fpChrDiscrepRpt, fpInvChrRpt
     global fpInvCoordStrandRpt, fpSourceDisplayRpt, fpBuildRpt
 
     fpCoord.close()
     fpInvMrkRpt.close()
     fpSecMrkRpt.close()
     fpChrDiscrepRpt.close()
+    fpInvChrRpt.close()
     fpInvCoordStrandRpt.close()
     fpSourceDisplayRpt.close()
     fpBuildRpt.close()
@@ -287,7 +303,7 @@ def closeFiles ():
 def loadTempTables ():
     global build
 
-    print 'Create a bcp file from the gene model input file'
+    print 'Create a bcp file from the coordinate input file'
     sys.stdout.flush()
 
     #
@@ -314,6 +330,7 @@ def loadTempTables ():
         source = tokens[5].strip()
 	display = tokens[6].strip()
 	sourceDisplay = '%s/%s' % (source, display)
+	print 'sourceDisplay: %s' % sourceDisplay
 	if not sourceDisplay in sourceDisplayList:
 	    sourceDisplayList.append(sourceDisplay)
         errors = createInvCoordStrandReport(mgiID, startCoordinate, endCoordinate, strand, source)
@@ -369,7 +386,7 @@ def createInvMarkerReport ():
     #
     # Find any MGI IDs from the coordinate file that:
     # 1) Do not exist in the database.
-    # 2) Exist for a non-marker object.
+    # 2) Exist for a non-marker object. (Exclude annotation evidence)
     # 3) Exist for a marker, but the status is not "offical" or "interim".
     #
     cmds.append('select tmp.mgiID, ' + \
@@ -388,7 +405,7 @@ def createInvMarkerReport ():
                      'ACC_MGIType t ' + \
                 'where a1.accID = tmp.mgiID and ' + \
                       'a1._LogicalDB_key = 1 and ' + \
-                      'a1._MGIType_key != 2 and ' + \
+                      'a1._MGIType_key not in (2, 25) and ' + \
                       'not exists (select 1 ' + \
                                   'from ACC_Accession a2 ' + \
                                   'where a2.accID = tmp.mgiID and ' + \
@@ -536,6 +553,79 @@ def createSecMarkerReport ():
 	    errorReportNames.append(secMrkRptFile + NL)
     return
 
+#
+# Purpose: Create the invalid chromosome report
+# Returns: Nothing
+# Assumes: Nothing
+# Effects: Nothing
+# Throws: Nothing
+#
+
+def createInvChrReport ():
+    global assoc, errorCount, errorReportNames, invChrList
+
+    print 'Create the invalid chromosome report'
+    fpInvChrRpt.write(string.center('Invalid Chromosome Report',96) + NL
+)
+    fpInvChrRpt.write(string.center('(' + timestamp + ')',96) + 2*NL)
+    fpInvChrRpt.write('%-20s  %-50s  %-10s%s' %
+                         ('MGI ID', 'Marker Symbol', 'Invalid Chr', NL))
+    fpInvChrRpt.write(20*'-' + '  ' + 50*'-' + '  ' +
+                          10*'-' + '  ' + NL)
+
+    cmds = []
+
+    #
+    # Find any cases where the feature chromosome is not a valid
+    # mouse chromosome
+    #
+    results = db.sql('''select tc.mgiID,
+                       tc.chromosome,
+                       tc.mgiID,
+                       m.symbol
+                from tempdb..%s tc,
+                     ACC_Accession a,
+                     MRK_Marker m
+                where tc.mgiID = a.accID
+                and a._MGIType_key = 2
+                and a._LogicalDB_key = 1
+                and a.preferred = 1
+                and a._Object_key = m._Marker_key
+                and tc.chromosome not in (select mc.chromosome
+		    from MRK_Chromosome mc
+		    where mc._Organism_key = 1
+		    and mc.chromosome != 'UN')
+                order by tc.mgiID''' % coordTempTable, 'auto')
+
+    #
+    # Write the records to the report.
+    #
+    for r in results:
+        mgiID = r['mgiID']
+        invChrList.append('"%s"' % r['chromosome'])
+        fpInvChrRpt.write('%-20s  %-50s  %-10s%s' %
+            (mgiID, r['symbol'], r['chromosome'], NL))
+
+        #
+        # If the MGI ID and gene model ID are found in the association
+        # dictionary, remove the gene model ID from the list so the
+        # association doesn't get written to the load-ready association file.
+        #
+        if liveRun == "1":
+            if assoc.has_key(mgiID):
+                list = assoc[mgiID]
+                if list.count(gmID) > 0:
+                    list.remove(gmID)
+                assoc[mgiID] = list
+    print 'Invalid Chromosomes: %s' % invChrList
+    numErrors = len(results)
+    fpInvChrRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
+
+    errorCount += numErrors
+    if numErrors > 0:
+        if not invChrRptFile in errorReportNames:
+            errorReportNames.append(invChrRptFile + NL)
+    return
 
 #
 # Purpose: Create the chromosome discrepancy report.
@@ -545,8 +635,7 @@ def createSecMarkerReport ():
 # Throws: Nothing
 #
 def createChrDiscrepReport ():
-    global assoc, errorCount, errorReportNames
-
+    global assoc, errorCount, errorReportNames, invChrList
     print 'Create the chromosome discrepancy report'
     fpChrDiscrepRpt.write(string.center('Chromosome Discrepancy Report',96) + NL)
     fpChrDiscrepRpt.write(string.center('(' + timestamp + ')',96) + 2*NL)
@@ -558,24 +647,28 @@ def createChrDiscrepReport ():
     cmds = []
 
     #
-    # Find any cases where the marker for the MGI ID in the association
-    # file has a different chromosome than what is in the gene model file.
+    # Find any cases where the marker in the coordinate file has
+    # a different chromosome than the feature in the coordinate file
     #
+    
+    # exclude invalid chromosomes
+    ic = string.join(invChrList, ',')
+    print 'invalid chromosomes: %s' % ic
     results = db.sql('''select tc.mgiID, 
                        tc.chromosome as fChr, 
-                       tc.mgiID, 
                        m.symbol, 
                        m.chromosome as mChr
                 from tempdb..%s tc, 
                      ACC_Accession a, 
                      MRK_Marker m 
-                where tc.mgiID = a.accID 
+                where tc.chromosome not in (%s)
+		and tc.mgiID = a.accID 
 		and a._MGIType_key = 2 
                 and a._LogicalDB_key = 1 
                 and a.preferred = 1 
                 and a._Object_key = m._Marker_key 
                 and m.chromosome != tc.chromosome 
-                order by tc.mgiID''' % coordTempTable, 'auto')
+                order by tc.mgiID''' % (coordTempTable, ic), 'auto')
 
 
     #
@@ -658,9 +751,10 @@ def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, s
 	reason = 'Invalid strand'
 	fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
             (mgiID, startCoordinate, endCoordinate, strand, source, reason, NL))
-
+    print 'errorReportNames: %s' % errorReportNames
     if numErrors > 0:
-	if not invCoordStrandRptFile in errorReportNames:
+	if not invCoordStrandRptFile + '\n' in errorReportNames:
+	    print 'adding invCoordStrandRptFile to errorReportNames'
 	    errorReportNames.append(invCoordStrandRptFile + NL)
 	
     errorCount += numErrors
@@ -688,13 +782,16 @@ def createSourceDisplayReport():
 	from MAP_Coord_Collection''', 'auto')
     for r in results:
 	dbSourceList.append('%s/%s' % (r['name'], r['abbreviation']))
-
+    print 'dbSourceList: %s' % dbSourceList
+    print 'sourceDisplayList: %s' % sourceDisplayList
     for s in sourceDisplayList:
 	if s not in dbSourceList:
 	    fpSourceDisplayRpt.write('%s%s' % (s, NL))
 	    newSource += 1
     if newSource != 0:
 	errorReportNames.append(sourceDisplayRptFile + NL)
+    else:
+	fpSourceDisplayRpt.write('No new source/display in input' + NL)
     return
 
 #
@@ -711,17 +808,20 @@ def createBuildReport():
     fpBuildRpt.write(string.center('Build Report',110) + NL)
     fpBuildRpt.write(string.center('(' + timestamp + ')',110) + 2*NL)
 
-    fpBuildRpt.write('Build Values in the Input' + NL)
-    fpBuildRpt.write(30*'-' + NL)
-    fpBuildRpt.write('%s%s%s' % (build, NL, NL))
+    #fpBuildRpt.write('Build Values in the Input' + NL)
+    #fpBuildRpt.write(30*'-' + NL)
+    #fpBuildRpt.write('%s%s%s' % (build, NL, NL))
 
-    fpBuildRpt.write('Build Values in the Database' + NL)
+    fpBuildRpt.write('Build Value Not in Database' + NL)
     fpBuildRpt.write(30*'-' + NL)
     results = db.sql('''select distinct version
 		from MAP_Coordinate''', 'auto')
+    dbBuildList = []
     for r in results:
-	fpBuildRpt.write(r['version'])
-    errorReportNames.append(buildRptFile + NL)
+	dbBuildList.append(r['version'])
+    if build not in dbBuildList:
+	fpBuildRpt.write(build + NL)
+	errorReportNames.append(buildRptFile + NL)
     return
 #
 # Main
@@ -732,6 +832,7 @@ openFiles()
 loadTempTables() # also reports invalid coords and strand
 createInvMarkerReport()
 createSecMarkerReport()
+createInvChrReport()
 createChrDiscrepReport()
 createSourceDisplayReport()
 createBuildReport()
@@ -741,10 +842,14 @@ if liveRun == "1":
     #createCoordLoadFile()
     print 'this is a live run'
 
+# always display the source/display report name
+fpRptNamesRpt.write(sourceDisplayRptFile + NL)
+
 if errorCount > 0:
     names = string.join(errorReportNames,'' )
     fpRptNamesRpt.write(names)
     fpRptNamesRpt.close()
     sys.exit(2)
 else:
+    fpRptNamesRpt.close()
     sys.exit(0)

@@ -140,6 +140,7 @@ then
     INVALID_MARKER_RPT=${CURRENTDIR}/`basename ${INVALID_MARKER_RPT}`
     SEC_MARKER_RPT=${CURRENTDIR}/`basename ${SEC_MARKER_RPT}`
     CHR_DISCREP_RPT=${CURRENTDIR}/`basename ${CHR_DISCREP_RPT}`
+    INVALID_CHR_RPT=${CURRENTDIR}/`basename ${INVALID_CHR_RPT}`
     INVALID_COORD_STRAND_RPT=${CURRENTDIR}/`basename ${INVALID_COORD_STRAND_RPT}`
     SOURCE_DISPLAY_RPT=${CURRENTDIR}/`basename ${SOURCE_DISPLAY_RPT}`
     BUILD_RPT=${CURRENTDIR}/`basename ${BUILD_RPT}`
@@ -157,7 +158,7 @@ touch ${LOG}
 #
 # Initialize the report files to make sure the current user can write to them.
 #
-RPT_LIST="${SANITY_RPT} ${INVALID_MARKER_RPT} ${SEC_MARKER_RPT}  ${CHR_DISCREP_RPT} ${SOURCE_DISPLAY_RPT} ${BUILD_RPT} ${INVALID_COORD_STRAND_RPT} ${RPT_NAMES_RPT}"
+RPT_LIST="${SANITY_RPT} ${INVALID_MARKER_RPT} ${SEC_MARKER_RPT}  ${CHR_DISCREP_RPT} ${INVALID_CHR_RPT} ${SOURCE_DISPLAY_RPT} ${BUILD_RPT} ${INVALID_COORD_STRAND_RPT} ${RPT_NAMES_RPT}"
 
 for i in ${RPT_LIST}
 do
@@ -327,7 +328,7 @@ then
 fi
 
 #
-# If either input file had sanity errors, remove the QC-ready files and
+# If the input file had sanity errors, remove the QC-ready files and
 # skip the QC reports.
 #
 if [ ${FILE_ERROR} -ne 0 ]
@@ -379,7 +380,7 @@ date >> ${LOG}
 echo "Generate the QC reports" >> ${LOG}
 # TO DO uncomment this when we test the python script
 { ${LOAD_QC} ${INPUT_FILE_QC} 2>&1; echo $? > ${TMP_FILE}; } >> ${LOG}
-echo 0 < ${TMP_FILE}
+#echo 0 < ${TMP_FILE}
 if [ `cat ${TMP_FILE}` -eq 1 ]
 then
     echo "An error occurred while generating the QC reports"
@@ -387,16 +388,17 @@ then
     RC=1
 elif [ `cat ${TMP_FILE}` -eq 2 ]
 then
-    cat ${RPT_NAMES_RPT} | tee -a ${LOG}
+    #cat ${RPT_NAMES_RPT} | tee -a ${LOG}
     RC=0
 elif [ `cat ${TMP_FILE}` -eq 3 ]
 then
-    cat ${RPT_NAMES_RPT} | tee -a ${LOG}
+    #cat ${RPT_NAMES_RPT} | tee -a ${LOG}
     RC=1
 else
     echo "QC reports successful, no errors" | tee -a ${LOG}
     RC=0
 fi
+cat ${RPT_NAMES_RPT} | tee -a ${LOG}
 
 #
 # Drop the temp tables.

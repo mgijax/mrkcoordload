@@ -1,3 +1,14 @@
+TAG: mrkcoordload-5-0-0-5
+DATE: 7/s0/2012
+STAFF: sc
+RELEASE: dev
+CHANGES: US#3 dn US#11 - bug fixes from testing
+1) mrkcoordload.config.default - Added INVALID_CHR_RPT=${RPTDIR}/invalid_chr.rpt
+2) checkColumns.py - don't strip the tokens before checking for numColumns
+	removed some debug
+3) mrkcoordQC.py - Added support for INVALID_CHR_RPT, exclude annot evid
+4) mrkcoordQC.sh - Added support for INVALID_CHR_RPT
+
 TAG: mrkcoordload-5-0-0-4
 TAG: mrkcoordload-5-0-0-3
 DATE: 7/26/2012
