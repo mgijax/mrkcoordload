@@ -822,6 +822,7 @@ def createBuildReport():
     if build not in dbBuildList:
 	fpBuildRpt.write(build + NL)
 	errorReportNames.append(buildRptFile + NL)
+	errorCount += 1
     return
 #
 # Main
