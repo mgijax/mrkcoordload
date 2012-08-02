@@ -457,17 +457,17 @@ def createInvMarkerReport ():
 
         # NOTE: Will need update to keep a dictionary of lines  from
 	# which to create the new file minus those with skip errors
-	# Below is comment and code from genemodelload version
+	# Below is comment and code from genemodelload version:
         # If the MGI ID and gene model ID are found in the association
         # dictionary, remove the gene model ID from the list so the
         # association doesn't get written to the load-ready association file.
         #
         if liveRun == "1":
-            if assoc.has_key(mgiID):
-                list = assoc[mgiID]
+            if coord.has_key(mgiID):
+                list = coord[mgiID]
                 if list.count(gmID) > 0:
                     list.remove(gmID)
-                assoc[mgiID] = list
+                coord[mgiID] = list
     numErrors = len(results[0])
     fpInvMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -486,7 +486,7 @@ def createInvMarkerReport ():
 # Throws: Nothing
 #
 def createSecMarkerReport ():
-    global assoc, errorCount, errorReportNames
+    global coord, errorCount, errorReportNames
 
     print 'Create the secondary marker report'
     fpSecMrkRpt.write(string.center('Secondary Marker Report',108) + NL)
@@ -500,7 +500,7 @@ def createSecMarkerReport ():
     cmds = []
 
     #
-    # Find any MGI IDs from the association file that are secondary IDs
+    # Find any MGI IDs from the coordinate file that are secondary IDs
     # for a marker.
     #
     cmds.append('select tmp.mgiID, ' + \
@@ -532,18 +532,19 @@ def createSecMarkerReport ():
             (mgiID, r['symbol'], r['accID'], NL))
 
         #
-	# NOTE: Will need update to keep a dictionary of lines  from
+        # NOTE: Will need update to keep a dictionary of lines  from
         # which to create the new file minus those with skip errors
+        # Below is comment and code from genemodelload version:
         # If the MGI ID and gene model ID are found in the association
         # dictionary, remove the gene model ID from the list so the
         # association doesn't get written to the load-ready association file.
         #
         if liveRun == "1":
-            if assoc.has_key(mgiID):
-                list = assoc[mgiID]
+            if coord.has_key(mgiID):
+                list = coord[mgiID]
                 if list.count(gmID) > 0:
                     list.remove(gmID)
-                assoc[mgiID] = list
+                coord[mgiID] = list
     numErrors = len(results[0])
     fpSecMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -562,7 +563,7 @@ def createSecMarkerReport ():
 #
 
 def createInvChrReport ():
-    global assoc, errorCount, errorReportNames, invChrList
+    global coord, errorCount, errorReportNames, invChrList
 
     print 'Create the invalid chromosome report'
     fpInvChrRpt.write(string.center('Invalid Chromosome Report',96) + NL
@@ -607,16 +608,19 @@ def createInvChrReport ():
             (mgiID, r['symbol'], r['chromosome'], NL))
 
         #
+        # NOTE: Will need update to keep a dictionary of lines  from
+        # which to create the new file minus those with skip errors
+        # Below is comment and code from genemodelload version:
         # If the MGI ID and gene model ID are found in the association
         # dictionary, remove the gene model ID from the list so the
         # association doesn't get written to the load-ready association file.
         #
         if liveRun == "1":
-            if assoc.has_key(mgiID):
-                list = assoc[mgiID]
+            if coord.has_key(mgiID):
+                list = coord[mgiID]
                 if list.count(gmID) > 0:
                     list.remove(gmID)
-                assoc[mgiID] = list
+                coord[mgiID] = list
     print 'Invalid Chromosomes: %s' % invChrList
     numErrors = len(results)
     fpInvChrRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
@@ -635,7 +639,7 @@ def createInvChrReport ():
 # Throws: Nothing
 #
 def createChrDiscrepReport ():
-    global assoc, errorCount, errorReportNames, invChrList
+    global coord, errorCount, errorReportNames, invChrList
     print 'Create the chromosome discrepancy report'
     fpChrDiscrepRpt.write(string.center('Chromosome Discrepancy Report',96) + NL)
     fpChrDiscrepRpt.write(string.center('(' + timestamp + ')',96) + 2*NL)
@@ -681,16 +685,19 @@ def createChrDiscrepReport ():
             (mgiID, r['symbol'], r['mChr'], r['fChr'], NL))
 
         #
+        # NOTE: Will need update to keep a dictionary of lines  from
+        # which to create the new file minus those with skip errors
+        # Below is comment and code from genemodelload version:
         # If the MGI ID and gene model ID are found in the association
         # dictionary, remove the gene model ID from the list so the
         # association doesn't get written to the load-ready association file.
         #
         if liveRun == "1":
-            if assoc.has_key(mgiID):
-                list = assoc[mgiID]
+            if coord.has_key(mgiID):
+                list = coord[mgiID]
                 if list.count(gmID) > 0:
                     list.remove(gmID)
-                assoc[mgiID] = list
+                coord[mgiID] = list
 
     numErrors = len(results)
     fpChrDiscrepRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
