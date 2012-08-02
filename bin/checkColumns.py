@@ -99,7 +99,6 @@ def checkColumns ():
 	lineNum = lineNum + 1
    	columns = string.split(line, TAB)
 	nc = len(columns) 
-	#print 'expected columns: %s actualColumns: %s columns: %s' % (numColumns, nc, columns)
 	if nc < numColumns:
 	    errors = errors + 1
 	    colError = colError + 1
@@ -110,9 +109,10 @@ def checkColumns ():
 	    continue
 	# default
 	bad = 1
-	# transpose empty last column
-	if columns[6] == '\n':
-	    columns[6] = ''
+	# remove newline from last column
+	last = columns[-1].strip()
+	columns[-1] = last
+
         # strand is optional
         if columns[0] != '' and columns[1] != '' and columns[2] != '' and columns[3] != '' and columns[5] != '' and columns[6] != '':
             bad = 0
@@ -122,7 +122,6 @@ def checkColumns ():
         if bad == 1:
             print 'Missing Data in required column: %s' % (columns)
 	### end code for missing data in req columns
-    #print 'end checkColumns and errors is: %s' % errors
     return
 
 #

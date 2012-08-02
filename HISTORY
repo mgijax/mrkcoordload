@@ -1,3 +1,11 @@
+TAG: mrkcoordload-5-0-0-6
+DATE: 8/02/2012
+STAFF: sc
+RELEASE: dev
+CHANGES: US#92/93 Bug fixes
+1) Remove \n in sanity report for missing data/column check
+2) report on command line when new source/display
+
 TAG: mrkcoordload-5-0-0-5
 DATE: 7/s0/2012
 STAFF: sc

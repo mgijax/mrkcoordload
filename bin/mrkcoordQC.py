@@ -778,6 +778,7 @@ def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, s
 #
 
 def createSourceDisplayReport():
+    global errorCount
 
     print 'Create the source display report'
     fpSourceDisplayRpt.write(string.center('Source/Display in Input, not in Database',110) + NL)
@@ -799,8 +800,9 @@ def createSourceDisplayReport():
 	    newSource += 1
     if newSource != 0:
 	errorReportNames.append(sourceDisplayRptFile + NL)
-    #else:
-#	fpSourceDisplayRpt.write('No new source/display in input' + NL)
+	errorCount += 1
+    else:
+	fpSourceDisplayRpt.write('No new source/display in input' + NL)
     return
 
 #
