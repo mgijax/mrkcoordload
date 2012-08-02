@@ -98,6 +98,9 @@ def checkColumns ():
 	colError = 0
 	lineNum = lineNum + 1
    	columns = string.split(line, TAB)
+	# remove newline from last column
+        last = columns[-1].strip()
+        columns[-1] = last
 	nc = len(columns) 
 	if nc < numColumns:
 	    errors = errors + 1
@@ -109,9 +112,6 @@ def checkColumns ():
 	    continue
 	# default
 	bad = 1
-	# remove newline from last column
-	last = columns[-1].strip()
-	columns[-1] = last
 
         # strand is optional
         if columns[0] != '' and columns[1] != '' and columns[2] != '' and columns[3] != '' and columns[5] != '' and columns[6] != '':
