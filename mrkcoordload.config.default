@@ -139,6 +139,14 @@ COORD_FILES="${INPUTDIR}/coordinateFileList.txt"
 
 export INFILE_NAME COORD_FILES
 
+# US 35 - create assocload file for mirbase id/marker associations
+# mirbase assocload configuration values
+ASSOCLOADER_SH=${ASSOCLOAD}/bin/AssocLoad2.sh
+ASSOCLOADCONFIG=${MRKCOORDLOAD}/assocload.config
+ASSOCDATADIR=${INPUTDIR}
+MIRBASE_ASSOC_FILE="${INPUTDIR}/mirbase_assocload.txt"
+
+export ASSOCLOADER_SH ASSOCLOADCONFIG ASSOCDATADIR MIRBASE_ASSOC_FILE
 
 #
 # general settings
