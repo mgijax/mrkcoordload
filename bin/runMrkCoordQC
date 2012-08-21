@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  runCoordQC
+#  runMrkCoordQC
 ###########################################################################
 #
 # A copy of this script is intended to reside in /usr/local/bin on all
@@ -13,7 +13,7 @@
 
 usage ()
 {
-    echo "Usage: runCoordQC input_file"
+    echo "Usage: runMrkCoordQC input_file"
     echo "       where"
     echo "           input_file = path to the mrkcoordload input file"
     exit 1

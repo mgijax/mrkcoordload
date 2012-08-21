@@ -67,6 +67,12 @@ then
     mkdir -p ${INPUTDIR}
 fi
 
+for c in assocload.config
+do
+. ${c}
+${DLAINSTALL} ${DEV}
+done
+
 # If this installation is being done on lindon, create a symbolic link to
 # the same input file path on hobbiton where the input file is published.
 # The input directory should be locked down to protect the symbolic link.

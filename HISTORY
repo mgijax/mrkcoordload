@@ -1,3 +1,14 @@
+TAG: mrkcoordload-5-0-0-8
+DATE: 8/02/2012
+STAFF: sc
+RELEASE: dev
+CHANGES: US 35 - add mirbase ids
+1) Install - add assocload directories
+2) runMrkCoordQC - fixed usage statement
+3) mrkcoordload.sh - updated to run assocload
+4) createInputFiles.py - updated to create assocload input
+    file -- currently contains debug print statements 
+
 TAG: mrkcoordload-5-0-0-7
 TAG: mrkcoordload-5-0-0-6
 DATE: 8/02/2012

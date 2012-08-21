@@ -9,6 +9,9 @@
 #     mrkcoordload.sh
 #
 
+cd `dirname $0`/..
+CONFIG_LOAD=`pwd`/mrkcoordload.config
+
 cd `dirname $0`
 LOG=`pwd`/createInputFiles.log
 rm -rf ${LOG}
@@ -23,8 +26,6 @@ then
     echo ${Usage} | tee -a ${LOG}
     exit 1
 fi
-
-CONFIG_LOAD=../mrkcoordload.config
 
 #
 # verify & source the configuration file
@@ -146,6 +147,7 @@ do
     key=`echo $l | cut -d= -f1 | /usr/local/bin/tr 'A-Z' 'a-z'`
     # get value as is
     value=`echo $l | cut -d= -f2`
+    value=`echo $value`
     if [ $key = 'build' ] ; then
         COORD_VERSION=$value
         export COORD_VERSION
@@ -195,6 +197,7 @@ do
     MAIL_LOADNAME="${COORD_COLLECTION_NAME}, ${MAIL_LOADNAME}"
     export MAIL_LOADNAME
 
+     echo "\n`date`" >> ${LOG_DIAG}
     echo "Running ${COORD_COLLECTION_NAME} mrkcoordload" | tee -a ${LOG_DIAG} ${LOG_PROC}
     ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
         -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD} \
@@ -207,6 +210,17 @@ do
     STAT=$?
     checkStatus ${STAT} "${COORD_COLLECTION_NAME} mrkcoordload java load"
 done
+
+# If there are mirbase associations load them
+if [ `cat ${MIRBASE_ASSOC_FILE} | wc -l` -gt 1 ]
+then
+    echo "\n`date`" >> ${LOG_DIAG}
+    echo "Running association load" | tee -a ${LOG_DIAG} ${LOG_PROC}
+    ${ASSOCLOADER_SH} ${CONFIG_LOAD} ${ASSOCLOADCONFIG} >> ${LOG_DIAG}
+    STAT=$?
+    checkStatus ${STAT} "${ASSOCLOADER_SH}"
+
+fi
 
 #
 # Touch the "lastrun" file to note when the load was run.

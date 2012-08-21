@@ -35,7 +35,7 @@
 #
 #      - Coordinate input file with the following tab-delimited fields:
 #
-#          1) Gene Model ID
+#          1) MGI ID
 #          2) Chromosome
 #          3) Start Coordinate
 #          4) End Coordinate
