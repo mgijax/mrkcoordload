@@ -91,8 +91,12 @@ def init():
 
     # write the header:
     fpMirbaseAssoc.write('MGI%smiRBase%s' % (TAB, CRT))
-
+    user = os.environ['MGD_DBUSER']
+    passwordFileName = os.environ['MGD_DBPASSWORDFILE']
+    
     db.useOneConnection(1)
+    db.set_sqlUser(user)
+    db.set_sqlPasswordFromFile(passwordFileName)
 
     # contain non-preferred IDs
     results = db.sql('''select a.accID, a._Object_key
