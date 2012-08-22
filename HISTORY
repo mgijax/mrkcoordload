@@ -1,6 +1,15 @@
+TAG: mrkcoordload-5-0-0-10
+DATE: 8/22/2012
+STAFF: sc
+RELEASE: dev
+CHANGES: US 35 - add mirbase ids
+1) assocload.config - set delete/reload to false because this deletes
+   all associations for the load user
+2) createInputFiles.py - query was selecting mbID instead of mgiID
+
 TAG: mrkcoordload-5-0-0-9
 TAG: mrkcoordload-5-0-0-8
-DATE: 8/02/2012
+DATE: 8/21/2012
 STAFF: sc
 RELEASE: dev
 CHANGES: US 35 - add mirbase ids
