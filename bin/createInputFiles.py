@@ -98,8 +98,8 @@ def init():
     results = db.sql('''select a.accID, a._Object_key
 	from ACC_Accession a
 	where a._MGIType_key = 2
-	and a._LogicalDB_key = 83
-	and preferred = 1''', 'auto')
+	and a._LogicalDB_key = 1
+	and a.prefixPart = 'MGI:' ''', 'auto')
     for r in results:
 	mgiID = r['accID']
 	markerKey = r['_Object_key']
@@ -111,37 +111,36 @@ def init():
 
 # US 35 - create assocload file for mirbase id/marker associations
 def processMirbase(mgiID, mbID):
-
-    # if the marker has mirbase ID in the database, but there is no
-    # mbID in the input, just delete it
     print 'processMirbase: %s %s' % (mgiID, mbID)
-    if mbID == '':
-	print 'no mbID'
-	if mirbaseDict.has_key(mgiID):
-	    print 'mirbaseDict has mgiID'
-	    markerKey = mirbaseDict[mgiID]
-	    results = db.sql('''select _Accession_key as aKey
-		    from ACC_Accession
-		    where _MGIType_key = 2
-		    and _LogicalDB_key = 83''', 'auto')
-	    # For each mirbase ID assoc with the marker delete it
-	    # We are really only expecting one
-	    print 'query results: %s' % results
-	    for r in results:
-		aKey = r['aKey']
-		print 'deleting accKey %s from marker %s' % (aKey, mgiID)
-		# delete from ACC_AccessionReference first
-		db.sql('''delete from ACC_AccessionReference
-		    where _Accession_key = %s''' % aKey, None)
-		db.sql('''delete from ACC_Accession
-		    where _Accession_key = %s''' % aKey, None)
-	else:
-	    print 'mirbaseDict does not have mgiID'
+    # always delete all mb IDs associated with the marker
+    if mirbaseDict.has_key(mgiID):
+	print 'mirbaseDict has mgiID, deleting associations'
+	markerKey = mirbaseDict[mgiID]
+	results = db.sql('''select _Accession_key as aKey
+		from ACC_Accession
+		where _MGIType_key = 2
+		and _LogicalDB_key = 83
+		and _Object_key = %s''' % markerKey, 'auto')
+	# For each mirbase ID assoc with the marker delete it
+	# We are really only expecting one
+	print 'query results: %s' % results
+	for r in results:
+	    aKey = r['aKey']
+	    print 'deleting accKey %s from marker %s' % (aKey, mgiID)
+	    # delete from ACC_AccessionReference first
+	    db.sql('''delete from ACC_AccessionReference
+		where _Accession_key = %s''' % aKey, None)
+	    db.sql('''delete from ACC_Accession
+		where _Accession_key = %s''' % aKey, None)
+
     else:
+	print 'mirbaseDict does not have mgiID'
+    # if there is a mirbase ID in the input, write to association file
+    if mbID != '':
 	print 'is mbID writing to assocload file'
 	# write out to assocload input file
 	fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbID, CRT))
-	return
+    return
 
 # US 35 - input file now has 8 columns, the 8th being MiRBase ID, optional
 def readInput():
