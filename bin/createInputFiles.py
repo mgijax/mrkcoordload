@@ -115,10 +115,10 @@ def init():
 
 # US 35 - create assocload file for mirbase id/marker associations
 def processMirbase(mgiID, mbID):
-    print 'processMirbase: %s %s' % (mgiID, mbID)
+    #print 'processMirbase: %s %s' % (mgiID, mbID)
     # always delete all mb IDs associated with the marker
     if mirbaseDict.has_key(mgiID):
-	print 'mirbaseDict has mgiID, deleting associations'
+	#print 'mirbaseDict has mgiID, deleting associations'
 	markerKey = mirbaseDict[mgiID]
 	results = db.sql('''select _Accession_key as aKey
 		from ACC_Accession
@@ -127,10 +127,10 @@ def processMirbase(mgiID, mbID):
 		and _Object_key = %s''' % markerKey, 'auto')
 	# For each mirbase ID assoc with the marker delete it
 	# We are really only expecting one
-	print 'query results: %s' % results
+	#print 'query results: %s' % results
 	for r in results:
 	    aKey = r['aKey']
-	    print 'deleting accKey %s from marker %s' % (aKey, mgiID)
+	    #print 'deleting accKey %s from marker %s' % (aKey, mgiID)
 	    # delete from ACC_AccessionReference first
 	    db.sql('''delete from ACC_AccessionReference
 		where _Accession_key = %s''' % aKey, None)
@@ -138,10 +138,10 @@ def processMirbase(mgiID, mbID):
 		where _Accession_key = %s''' % aKey, None)
 
     else:
-	print 'mirbaseDict does not have mgiID'
+	#print 'mirbaseDict does not have mgiID'
     # if there is a mirbase ID in the input, write to association file
     if mbID != '':
-	print 'is mbID writing to assocload file'
+	#print 'is mbID writing to assocload file'
 	# write out to assocload input file
 	fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbID, CRT))
     return
@@ -160,7 +160,7 @@ def readInput():
     # discard the header line
     junk = fpInput.readline()
     for r in fpInput.readlines():
-	print 'r: %s' % r
+	#print 'r: %s' % r
 	# create list of columns
 	columnList = r.split(TAB)
 	if len(columnList) < 7:
@@ -169,7 +169,7 @@ def readInput():
         # US 35 - get mgiID column
         mgiID = columnList[0].strip()
 	mbID = columnList[7].strip()
-	print 'calling processMirbase and sending %s and %s' % (mgiID, mbID)
+	#print 'calling processMirbase and sending %s and %s' % (mgiID, mbID)
 	processMirbase(mgiID, mbID)
 
 	# add the coordinates to dictionary by collectin and abbrev
