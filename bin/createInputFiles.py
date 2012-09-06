@@ -137,7 +137,7 @@ def processMirbase(mgiID, mbID):
 	    db.sql('''delete from ACC_Accession
 		where _Accession_key = %s''' % aKey, None)
 
-    else:
+    #else:
 	#print 'mirbaseDict does not have mgiID'
     # if there is a mirbase ID in the input, write to association file
     if mbID != '':

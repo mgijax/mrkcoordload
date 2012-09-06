@@ -6,6 +6,8 @@ CHANGES: US 35 - add mirbase ids
 1) assocload.config - set delete/reload to false because this deletes
    all associations for the load user
 2) createInputFiles.py - query was selecting mbID instead of mgiID
+   added explicit setting of user and passwork in python db module
+3) assocload.config - use DATALOADSOUTPUT
 
 TAG: mrkcoordload-5-0-0-9
 TAG: mrkcoordload-5-0-0-8
