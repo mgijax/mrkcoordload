@@ -1,1 +1,84 @@
-Needs to be implemented - use genemodelload as template
+#!/bin/sh
+#
+#  publishCoordFile
+###########################################################################
+#
+# A copy of this script is intended to reside in /usr/local/bin on all
+# servers to make it available in the common PATH.
+#
+# Its allows someone to publish a new file of coordinates for markers
+# to the directory where the marker coordinate load will look for it.
+#
+###########################################################################
+
+usage ()
+{
+    echo "Usage: publishCoordFile coord_file"
+    echo "       where"
+    echo "           coord_file = path to the marker coordinate file"
+    exit 1
+}
+
+CURRENT_DIR=`pwd`
+
+# pick up the coordinate load product's location from the environment, if
+# available
+if [ "${COORDLOADDIR}" = "" ]; then
+	COORDLOADDIR=/usr/local/mgi/live/dataload/mrkcoordload
+fi
+
+#
+# The marker coordinate load product is not installed on all servers, so make
+# sure it exists on this one.
+#
+if [ ! -d ${COORDLOADDIR} ]
+then
+    echo "The marker coordinate load software does not exist on this server"; exit 1
+fi
+
+#
+# Make sure the config file for the load exists.
+#
+CONFIG=${COORDLOADDIR}/mrkcoordload.config
+if [ ! -r ${CONFIG} ]; then
+    echo "Missing config file:  ${CONFIG}"
+    exit 1
+fi
+
+#
+# Make sure a valid coordinate file was passed as an argument to the script.
+#
+if [ $# -ne 1 ]
+then
+    usage
+else
+    COORD_FILE=$1
+
+    if [ ! -r ${COORD_FILE} ]
+    then
+        echo "Coordinate file does not exist: ${COORD_FILE}"; exit 1
+    fi
+fi
+
+#
+# Source the configuration files.
+#
+cd ${COORDLOADDIR}
+. ${CONFIG}
+
+#
+# Copy the coordinate file to the input directory where it will be
+# picked up by the load.
+#
+cd ${CURRENT_DIR}
+echo "Source File:      ${COORD_FILE}"
+echo "Destination File: ${INPUT_FILE_DEFAULT}"
+cp ${COORD_FILE} ${INPUT_FILE_DEFAULT}
+if [ $? -eq 0 ]
+then
+    echo "Copy successful"
+    exit 0
+else
+    echo "Copy failed"
+    exit 1
+fi
