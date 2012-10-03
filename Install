@@ -116,5 +116,34 @@ then
     chmod -f 755 ${LOAD_QC_SH}
 fi
 
+# copy the scripts for curator use into a standard location which exists in
+# their path statements
+
+DEPLOY_PATH=/usr/local/mgi/bin
+
+if [ ! -d ${DEPLOY_PATH} ]; then
+	# failure to deploy is not a fatal error; could happen during
+	# development under a home directory
+	echo "Warning: ${DEPLOY_PATH} does not exist; curator scripts were not copied."
+fi
+
+if [ -d ${DEPLOY_PATH} ]; then
+	# copy files, change permissions, and check for errors
+	# deployment errors are non-fatal, as they can occur regularly in an
+	# SE's development area
+
+	for file in runMrkCoordQC publishCoordFile
+	do
+		cp bin/${file} ${DEPLOY_PATH}
+		if [ $? -ne 0 ]; then
+			echo "Warning: Failed to copy ${file} to ${DEPLOY_PATH}"
+		fi
+
+		chmod 755 ${DEPLOY_PATH}/${file}
+		if [ $? -ne 0 ]; then
+			echo "Warning: Failed to change permissions on ${DEPLOY_PATH}/${file}"
+		fi
+	done
+fi
 exit 0
 
