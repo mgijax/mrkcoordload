@@ -122,10 +122,16 @@ fi
 # trim any trailing slash from MGIBIN variable
 DEPLOY_PATH=`echo "${MGIBIN}" | sed 's./$..'`
 
+if [ "${DEPLOY_PATH}" = "" ]; then
+	echo "Warning: MGIBIN variable missing from mgiconfig; cannot deploy curator files"
+	exit 0
+fi
+
 if [ ! -d ${DEPLOY_PATH} ]; then
 	# failure to deploy is not a fatal error; could happen during
 	# development under a home directory
 	echo "Warning: ${DEPLOY_PATH} does not exist; curator scripts were not copied."
+	exit 0
 fi
 
 if [ -d ${DEPLOY_PATH} ]; then
@@ -145,6 +151,7 @@ if [ -d ${DEPLOY_PATH} ]; then
 			echo "Warning: Failed to change permissions on ${DEPLOY_PATH}/${file}"
 		fi
 	done
+	echo "Deployed curator files to ${DEPLOY_PATH}"
 fi
 exit 0
 
