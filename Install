@@ -119,7 +119,8 @@ fi
 # copy the scripts for curator use into a standard location which exists in
 # their path statements
 
-DEPLOY_PATH=/usr/local/mgi/bin
+# trim any trailing slash from MGIBIN variable
+DEPLOY_PATH=`echo "${MGIBIN}" | sed 's./$..'`
 
 if [ ! -d ${DEPLOY_PATH} ]; then
 	# failure to deploy is not a fatal error; could happen during
