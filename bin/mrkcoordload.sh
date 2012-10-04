@@ -121,17 +121,17 @@ LASTRUN_FILE=${INPUTDIR}/lastrun
 #
 # Generate the sanity/QC reports
 #
-#echo "" >> ${LOG_DIAG}
-#date >> ${LOG_DIAG}
-#echo "Generate the sanity/QC reports" | tee -a ${LOG_DIAG}
-#${LOAD_QC_SH} ${INPUT_FILE_DEFAULT} ${RUNTYPE} 2>&1 >> ${LOG_DIAG}
-#STAT=$?
-#checkStatus ${STAT} "QC reports"
-#if [ ${STAT} -eq 1 ]
-#then
-#    shutDown
-#    exit 1
-#fi
+echo "" >> ${LOG_DIAG}
+date >> ${LOG_DIAG}
+echo "Generate the sanity/QC reports" | tee -a ${LOG_DIAG}
+${LOAD_QC_SH} ${INPUT_FILE_DEFAULT} ${RUNTYPE} 2>&1 >> ${LOG_DIAG}
+STAT=$?
+checkStatus ${STAT} "QC reports"
+if [ ${STAT} -eq 1 ]
+then
+    shutDown
+    exit 1
+fi
 
 # get the coordinate version
 save=$IFS
@@ -141,7 +141,7 @@ export IFS
 ## We will want to update INPUT_FILE_DEFAULT to INPUT_FILE_LOAD
 ## when we are ready to run the qC reports from the load
 # Iterate thru tokens on first line delimited by IFS
-for l in `cat ${INPUT_FILE_DEFAULT} | line`
+for l in `cat ${INPUT_FILE_LOAD} | line`
 do
     # get key in lower case
     key=`echo $l | cut -d= -f1 | /usr/local/bin/tr 'A-Z' 'a-z'`
