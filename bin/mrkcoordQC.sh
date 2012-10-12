@@ -33,6 +33,7 @@
 #          5) Strand (+ or -)
 #          6) Provider - the source of the data e.g. 'NCBI UniSTS'
 #	   7) Provider Display - What is displayed in the WI e.g. 'UniSTS'
+#          8) miRBase ID
 #
 #  Outputs:
 #
@@ -139,9 +140,11 @@ then
     SANITY_RPT=${CURRENTDIR}/`basename ${SANITY_RPT}`
     INVALID_MARKER_RPT=${CURRENTDIR}/`basename ${INVALID_MARKER_RPT}`
     SEC_MARKER_RPT=${CURRENTDIR}/`basename ${SEC_MARKER_RPT}`
-    CHR_DISCREP_RPT=${CURRENTDIR}/`basename ${CHR_DISCREP_RPT}`
     INVALID_CHR_RPT=${CURRENTDIR}/`basename ${INVALID_CHR_RPT}`
+    CHR_DISCREP_RPT=${CURRENTDIR}/`basename ${CHR_DISCREP_RPT}`
     INVALID_COORD_STRAND_RPT=${CURRENTDIR}/`basename ${INVALID_COORD_STRAND_RPT}`
+    NON_MIRNA_MARKER_RPT=${CURRENTDIR}/`basename ${NON_MIRNA_MARKER_RPT}`
+    MIRBASE_DELETE_RPT=${CURRENTDIR}/`basename ${MIRBASE_DELETE_RPT}`
     SOURCE_DISPLAY_RPT=${CURRENTDIR}/`basename ${SOURCE_DISPLAY_RPT}`
     BUILD_RPT=${CURRENTDIR}/`basename ${BUILD_RPT}`
     RPT_NAMES_RPT=${CURRENTDIR}/`basename ${RPT_NAMES_RPT}`
@@ -158,7 +161,7 @@ touch ${LOG}
 #
 # Initialize the report files to make sure the current user can write to them.
 #
-RPT_LIST="${SANITY_RPT} ${INVALID_MARKER_RPT} ${SEC_MARKER_RPT}  ${CHR_DISCREP_RPT} ${INVALID_CHR_RPT} ${SOURCE_DISPLAY_RPT} ${BUILD_RPT} ${INVALID_COORD_STRAND_RPT} ${RPT_NAMES_RPT}"
+RPT_LIST="${SANITY_RPT} ${INVALID_MARKER_RPT} ${SEC_MARKER_RPT} ${INVALID_CHR_RPT} ${CHR_DISCREP_RPT} ${INVALID_COORD_STRAND_RPT} ${NON_MIRNA_MARKER_RPT} ${MIRBASE_DELETE_RPT} ${SOURCE_DISPLAY_RPT} ${BUILD_RPT} ${RPT_NAMES_RPT}"
 
 for i in ${RPT_LIST}
 do
@@ -168,12 +171,12 @@ done
 #
 # Convert the input file into a QC-ready version that can be used to
 # run the sanity/QC reports against. This involves doing the following:
-# 1) Extract columns 1 thru 7
+# 1) Extract columns 1 thru 8
 # 2) Extract only lines that have alphanumerics (excludes blank lines)
 # 3) Remove any Ctrl-M characters (dos2unix)
 # 4) Extract only lines that do not begin with '#'
 #
-cat ${INPUT_FILE} | cut -d'	' -f1-7 | grep '[0-9A-Za-z]' | grep -v '^#' > ${INPUT_FILE_QC}
+cat ${INPUT_FILE} | cut -d'	' -f1-8 | grep '[0-9A-Za-z]' | grep -v '^#' > ${INPUT_FILE_QC}
 dos2unix ${INPUT_FILE_QC} ${INPUT_FILE_QC} 2>/dev/null
 
 #
@@ -194,7 +197,6 @@ checkHeader ()
     else
 	return 0
     fi
-
 }
 
 #
@@ -217,7 +219,6 @@ checkDupLines ()
         return 1
     fi
 }
-
 
 #
 # FUNCTION: Check for a duplicated field in an input file and write the field
@@ -243,28 +244,6 @@ checkDupFields ()
 }
 
 #
-# FUNCTION: Check the MGI ID column for data that does not start with 'MGI:'
-#           and write the fieild value to the sanity report.
-#
-checkMGIIDS ()
-{
-    FILE=$1         # The input file to check
-    REPORT=$2       # The sanity report to write to
-    echo "\n\nBad MGI ID" >> ${REPORT}
-    echo "------------------------------" >> ${REPORT}
-    # get the first column excluding the header which contains '='
-    cat ${FILE} | grep -v '=' | grep -i -v '^MGI:' > ${TMP_FILE}
-    cat ${TMP_FILE} >> ${REPORT}
-    if [ `cat ${TMP_FILE} | wc -l` -eq 0 ]
-    then
-        return 0
-    else
-        return 1
-    fi
-
-}
-
-#
 # FUNCTION: Check for lines with missing columns and data in input file and
 #           write the line numbers to the sanity report.
 #
@@ -274,7 +253,7 @@ checkColumns ()
     REPORT=$2       # The sanity report to write to
     NUM_COLUMNS=$3  # The number of columns expected in each input record
     echo "\n\nLines With Missing Columns or Data" >> ${REPORT}
-    echo "--------------------------" >> ${REPORT}
+    echo "-----------------------------------" >> ${REPORT}
     ${MRKCOORDLOAD}/bin/checkColumns.py ${FILE} ${NUM_COLUMNS} > ${TMP_FILE}
     cat ${TMP_FILE} >> ${REPORT} 
     if [ `cat ${TMP_FILE} | wc -l` -eq 0 ]
@@ -285,6 +264,49 @@ checkColumns ()
     fi
 }
 
+#
+# FUNCTION: Check the MGI ID column for data that does not start with 'MGI:'
+#           and write the field value to the sanity report.
+#
+checkMGIIDS ()
+{
+    FILE=$1         # The input file to check
+    REPORT=$2       # The sanity report to write to
+    echo "\n\nBad MGI ID" >> ${REPORT}
+    echo "---------------" >> ${REPORT}
+    # get the first column excluding the header which contains '='
+    cat ${FILE} | grep -v '=' | grep -i -v '^MGI:' > ${TMP_FILE}
+    cat ${TMP_FILE} >> ${REPORT}
+    if [ `cat ${TMP_FILE} | wc -l` -eq 0 ]
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
+#
+# FUNCTION: Check the miRBase ID column for duplicates and write the field
+#           value to the sanity report.
+#
+checkMirbaseIDS ()
+{
+    FILE=$1         # The input file to check
+    REPORT=$2       # The sanity report to write to
+
+    echo "\n\nDuplicate miRBase IDs" >> ${REPORT}
+    echo "-------------------------" >> ${REPORT}
+    cut -d'	' -f8 ${FILE} | grep "^MI" | sort | uniq -d > ${TMP_FILE}
+    cat ${TMP_FILE} >> ${REPORT}
+    if [ `cat ${TMP_FILE} | wc -l` -eq 0 ]
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
+#
 # Run sanity checks on the gene model input file.
 #
 echo "" >> ${LOG}
@@ -317,6 +339,12 @@ then
 fi
 
 checkMGIIDS ${INPUT_FILE_QC} ${SANITY_RPT}
+if [ $? -ne 0 ]
+then
+    FILE_ERROR=1
+fi
+
+checkMirbaseIDS ${INPUT_FILE_QC} ${SANITY_RPT}
 if [ $? -ne 0 ]
 then
     FILE_ERROR=1
@@ -356,6 +384,7 @@ create table ${TEMP_TABLE} (
     strand char(1) null,
     provider varchar(255) not null,
     display varchar(255) not null,
+    mirbaseID varchar(80) null,
     buildValue varchar(30) not null
 )
 go
