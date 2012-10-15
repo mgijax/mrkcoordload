@@ -1,3 +1,13 @@
+TAG: mrkcoordload-5-0-0-12
+DATE: 10/15/2012
+STAFF: sc
+RELEASE: dev
+CHANGES: 
+1) Daves changes for US10 mirbase QC
+2) Jon changes to publish
+2) createInputFiles.py - delete mirbase ID from all markers, not just marker in the input
+3) mrkcoordload.sh - uncomment checking for lastrun file
+
 TAG: mrkcoordload-5-0-0-11
 TAG: mrkcoordload-5-0-0-10
 DATE: 8/22/2012

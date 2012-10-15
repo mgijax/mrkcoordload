@@ -20,13 +20,22 @@
 	6. collection name
 	7. collection abbreviation
 
-  Outputs: tab delimited files in coordload format, one for each collection
+  Outputs: 
+	Tab delimited files in coordload format, one for each collection
         1. MGI ID 
         2. Chr
         3. start coordinate
         4. end coordinate
         5. strand
-	
+
+	Optional tab delimited mirbase assocload file
+	header:
+	1. MGI
+	2. miRBase
+	data rows:
+	1. MGI ID 
+	2. miRBase ID
+
   Assumes:
 	QC process detects:
 	1. invalid collections
@@ -65,9 +74,6 @@ inputFile = os.environ['INPUT_FILE_DEFAULT']
 # US 35 - create assocload file for mirbase id/marker associations
 mirbaseAssocFile = os.environ['MIRBASE_ASSOC_FILE']
 
-# mirbase ID lookup {mgiID:markerKey, ...}
-mirbaseDict = {}
-
 # root filepath for coordload files by collection
 coordFileRoot = os.environ['INFILE_NAME']
 
@@ -85,7 +91,7 @@ collectionList = []
 # (MGI ID:_Marker_key
 # US 35 - initialize lookup of markers with mirbase IDs
 def init():
-    global fpMirbaseAssoc, mirbaseDict
+    global fpMirbaseAssoc
 
     fpMirbaseAssoc = open(mirbaseAssocFile, 'w')
 
@@ -97,54 +103,40 @@ def init():
     db.useOneConnection(1)
     db.set_sqlUser(user)
     db.set_sqlPasswordFromFile(passwordFileName)
-
-    # contain non-preferred IDs
-    results = db.sql('''select a.accID, a._Object_key
-	from ACC_Accession a
-	where a._MGIType_key = 2
-	and a._LogicalDB_key = 1
-	and a.prefixPart = 'MGI:' ''', 'auto')
-    for r in results:
-	mgiID = r['accID']
-	markerKey = r['_Object_key']
-
-	# one mirbase ID per mgi ID
-        mirbaseDict[mgiID] = markerKey
-
     db.useOneConnection(0)
 
 # US 35 - create assocload file for mirbase id/marker associations
 def processMirbase(mgiID, mbID):
-    #print 'processMirbase: %s %s' % (mgiID, mbID)
-    # always delete all mb IDs associated with the marker
-    if mirbaseDict.has_key(mgiID):
-	#print 'mirbaseDict has mgiID, deleting associations'
-	markerKey = mirbaseDict[mgiID]
-	results = db.sql('''select _Accession_key as aKey
-		from ACC_Accession
-		where _MGIType_key = 2
-		and _LogicalDB_key = 83
-		and _Object_key = %s''' % markerKey, 'auto')
-	# For each mirbase ID assoc with the marker delete it
-	# We are really only expecting one
-	#print 'query results: %s' % results
-	for r in results:
-	    aKey = r['aKey']
-	    #print 'deleting accKey %s from marker %s' % (aKey, mgiID)
-	    # delete from ACC_AccessionReference first
-	    db.sql('''delete from ACC_AccessionReference
-		where _Accession_key = %s''' % aKey, None)
-	    db.sql('''delete from ACC_Accession
-		where _Accession_key = %s''' % aKey, None)
+    #
+    # Delete association to all markers associated with 'mbId'
+    #
+    results = db.sql('''select a1._Accession_key as aKey, a2.accid as mgiID
+	    from ACC_Accession a1, ACC_Accession a2
+	    where a1._MGIType_key = 2
+	    and a1._LogicalDB_key = 83
+	    and a1.accid = '%s' 
+	    and a1._Object_key = a2._Object_key
+	    and a2._MGIType_key = 2
+	    and a2._LogicalDB_key = 1
+	    and a2.preferred = 1
+	    and a2.prefixPart = 'MGI:' ''' % mbID, 'auto')
+    for r in results:
+	#print 'deleting mirbaseID %s association with %s' % (mbID, r['mgiID'])
+	deleteAccession(r['aKey'])
 
-    #else:
-	#print 'mirbaseDict does not have mgiID'
-    # if there is a mirbase ID in the input, write to association file
-    if mbID != '':
-	#print 'is mbID writing to assocload file'
-	# write out to assocload input file
-	fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbID, CRT))
+    # write out to assocload input file
+    fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbID, CRT))
+
     return
+
+def deleteAccession(aKey):
+	# delete from ACC_AccessionReference first
+	#print 'deleting aKey: %s' % aKey
+	db.sql('''delete from ACC_AccessionReference
+	    where _Accession_key = %s''' % aKey, None)
+	db.sql('''delete from ACC_Accession
+	    where _Accession_key = %s''' % aKey, None)
+	return
 
 # US 35 - input file now has 8 columns, the 8th being MiRBase ID, optional
 def readInput():
@@ -169,8 +161,9 @@ def readInput():
         # US 35 - get mgiID column
         mgiID = columnList[0].strip()
 	mbID = columnList[7].strip()
-	#print 'calling processMirbase and sending %s and %s' % (mgiID, mbID)
-	processMirbase(mgiID, mbID)
+	if mbID != '':
+	    #print 'calling processMirbase and sending %s and %s' % (mgiID, mbID)
+	    processMirbase(mgiID, mbID)
 
 	# add the coordinates to dictionary by collectin and abbrev
         # for later processing
