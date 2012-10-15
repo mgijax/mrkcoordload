@@ -30,6 +30,7 @@
 #	   SOURCE_DISPLAY_RPT
 #	   BUILD_RPT
 #	   RPT_NAMES_RPT
+#	   INPUT_FILE_LOAD
 #
 #      The following environment variable is set by the wrapper script:
 #
@@ -72,6 +73,8 @@
 #      - QC report (${BUILD_RPT})
 #
 #      - QC report (${RPT_NAMES_RPT})
+#
+#      - Load-ready input file (${INPUT_FILE_LOAD})
 #
 #  Exit Codes:
 #
@@ -139,6 +142,7 @@ liveRun = os.environ['LIVE_RUN']
 
 coordBCPFile = os.environ['INPUT_FILE_BCP']
 coordTempTable = os.environ['TEMP_TABLE']
+coordLoadFile = os.environ['INPUT_FILE_LOAD']
 
 invMrkRptFile = os.environ['INVALID_MARKER_RPT']
 secMrkRptFile = os.environ['SEC_MARKER_RPT']
@@ -168,6 +172,7 @@ timestamp = mgi_utils.date()
 errorCount = 0
 coordErrorCount = 0
 errorReportNames = []
+badMGIIDs = {}
 
 
 #
@@ -415,7 +420,7 @@ def writeInvcoordStrandFooter():
 # Throws: Nothing
 #
 def createInvMarkerReport ():
-    global errorCount, errorReportNames
+    global errorCount, errorReportNames, badMGIIDs
 
     print 'Create the invalid marker report'
     fpInvMrkRpt.write(string.center('Invalid Marker Report',110) + NL)
@@ -500,19 +505,16 @@ def createInvMarkerReport ():
         fpInvMrkRpt.write('%-12s  %-20s  %-20s  %-30s%s' %
             (mgiID,  objectType, markerStatus, reason, NL))
 
-        # NOTE: Will need update to keep a dictionary of lines  from
-	# which to create the new file minus those with skip errors
-	# Below is comment and code from genemodelload version:
-        # If the MGI ID and gene model ID are found in the association
-        # dictionary, remove the gene model ID from the list so the
-        # association doesn't get written to the load-ready association file.
+        #
+        # If this is a live run of the load, maintain a list of MGI IDs that
+        # are being rejected. The input lines with these MGI IDs will be
+        # excluded from the new "load-ready" input file that gets created
+        # at the end of this script.
         #
         if liveRun == "1":
-            if coord.has_key(mgiID):
-                list = coord[mgiID]
-                if list.count(gmID) > 0:
-                    list.remove(gmID)
-                coord[mgiID] = list
+            if not badMGIIDs.has_key(mgiID):
+                badMGIIDs[mgiID] = ''
+
     numErrors = len(results[0])
     fpInvMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -531,7 +533,7 @@ def createInvMarkerReport ():
 # Throws: Nothing
 #
 def createSecMarkerReport ():
-    global coord, errorCount, errorReportNames
+    global coord, errorCount, errorReportNames, badMGIIDs
 
     print 'Create the secondary marker report'
     fpSecMrkRpt.write(string.center('Secondary Marker Report',108) + NL)
@@ -577,19 +579,15 @@ def createSecMarkerReport ():
             (mgiID, r['symbol'], r['accID'], NL))
 
         #
-        # NOTE: Will need update to keep a dictionary of lines  from
-        # which to create the new file minus those with skip errors
-        # Below is comment and code from genemodelload version:
-        # If the MGI ID and gene model ID are found in the association
-        # dictionary, remove the gene model ID from the list so the
-        # association doesn't get written to the load-ready association file.
+        # If this is a live run of the load, maintain a list of MGI IDs that
+        # are being rejected. The input lines with these MGI IDs will be
+        # excluded from the new "load-ready" input file that gets created
+        # at the end of this script.
         #
         if liveRun == "1":
-            if coord.has_key(mgiID):
-                list = coord[mgiID]
-                if list.count(gmID) > 0:
-                    list.remove(gmID)
-                coord[mgiID] = list
+            if not badMGIIDs.has_key(mgiID):
+                badMGIIDs[mgiID] = ''
+
     numErrors = len(results[0])
     fpSecMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -608,7 +606,7 @@ def createSecMarkerReport ():
 # Throws: Nothing
 #
 def createInvChrReport ():
-    global coord, errorCount, errorReportNames, invChrList
+    global coord, errorCount, errorReportNames, invChrList, badMGIIDs
 
     print 'Create the invalid chromosome report'
     fpInvChrRpt.write(string.center('Invalid Chromosome Report',96) + NL
@@ -653,20 +651,15 @@ def createInvChrReport ():
             (mgiID, r['symbol'], r['chromosome'], NL))
 
         #
-        # NOTE: Will need update to keep a dictionary of lines  from
-        # which to create the new file minus those with skip errors
-        # Below is comment and code from genemodelload version:
-        # If the MGI ID and gene model ID are found in the association
-        # dictionary, remove the gene model ID from the list so the
-        # association doesn't get written to the load-ready association file.
+        # If this is a live run of the load, maintain a list of MGI IDs that
+        # are being rejected. The input lines with these MGI IDs will be
+        # excluded from the new "load-ready" input file that gets created
+        # at the end of this script.
         #
         if liveRun == "1":
-            if coord.has_key(mgiID):
-                list = coord[mgiID]
-                if list.count(gmID) > 0:
-                    list.remove(gmID)
-                coord[mgiID] = list
-    #print 'Invalid Chromosomes: %s' % invChrList
+            if not badMGIIDs.has_key(mgiID):
+                badMGIIDs[mgiID] = ''
+
     numErrors = len(results)
     fpInvChrRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -730,21 +723,6 @@ def createChrDiscrepReport ():
         fpChrDiscrepRpt.write('%-20s  %-50s  %-10s  %-10s%s' %
             (mgiID, r['symbol'], r['mChr'], r['fChr'], NL))
 
-        #
-        # NOTE: Will need update to keep a dictionary of lines  from
-        # which to create the new file minus those with skip errors
-        # Below is comment and code from genemodelload version:
-        # If the MGI ID and gene model ID are found in the association
-        # dictionary, remove the gene model ID from the list so the
-        # association doesn't get written to the load-ready association file.
-        #
-        if liveRun == "1":
-            if coord.has_key(mgiID):
-                list = coord[mgiID]
-                if list.count(gmID) > 0:
-                    list.remove(gmID)
-                coord[mgiID] = list
-
     numErrors = len(results)
     fpChrDiscrepRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -763,7 +741,7 @@ def createChrDiscrepReport ():
 # Throws: Nothing
 #
 def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, source):
-    global errorCount, errorReportNames, coordErrorCount
+    global errorCount, errorReportNames, coordErrorCount, badMGIIDs
 
     numErrors = 0    
     if len(re.findall('[^0-9]',startCoordinate)) > 0:
@@ -791,7 +769,18 @@ def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, s
 	fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
             (mgiID, startCoordinate, endCoordinate, strand, source, reason, NL))
     #print 'errorReportNames: %s' % errorReportNames
+
     if numErrors > 0:
+        #
+        # If this is a live run of the load, maintain a list of MGI IDs that
+        # are being rejected. The input lines with these MGI IDs will be
+        # excluded from the new "load-ready" input file that gets created
+        # at the end of this script.
+        #
+        if liveRun == "1":
+            if not badMGIIDs.has_key(mgiID):
+                badMGIIDs[mgiID] = ''
+
 	if not invCoordStrandRptFile + '\n' in errorReportNames:
 	    #print 'adding invCoordStrandRptFile to errorReportNames'
 	    errorReportNames.append(invCoordStrandRptFile + NL)
@@ -852,20 +841,6 @@ def createNonMirnaMarkerReport ():
         fpNonMirnaMrkRpt.write('%-16s  %-30s  %-16s%s' %
             (mgiID, featureType, mirbaseID, NL))
 
-        #
-        # NOTE: Will need update to keep a dictionary of lines  from
-        # which to create the new file minus those with skip errors
-        # Below is comment and code from genemodelload version:
-        # If the MGI ID and gene model ID are found in the association
-        # dictionary, remove the gene model ID from the list so the
-        # association doesn't get written to the load-ready association file.
-        #
-        if liveRun == "1":
-            if coord.has_key(mgiID):
-                list = coord[mgiID]
-                if list.count(gmID) > 0:
-                    list.remove(gmID)
-                coord[mgiID] = list
     numErrors = len(results[0])
     fpNonMirnaMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -1032,6 +1007,45 @@ def createBuildReport():
 
 
 #
+# Purpose: Create the "load-ready" coordinate file from input records that
+#          were not rejected by QC checks.
+# Returns: Nothing
+# Assumes: Nothing
+# Effects: Nothing
+# Throws: Nothing
+#
+def createCoordLoadFile ():
+
+    try:
+        fpCoord = open(coordFile, 'r')
+    except:
+        print 'Cannot open input file: ' + coordFile
+        sys.exit(1)
+
+    try:
+        fpLoadFile = open(coordLoadFile, 'w')
+    except:
+        print 'Cannot open output file: ' + coordLoadFile
+        sys.exit(1)
+
+    header = fpCoord.readline()
+    fpLoadFile.write(header)
+    for line in fpCoord.readlines():
+        tokens = re.split(TAB, line[:-1])
+        mgiID = tokens[0].strip()
+
+        #
+        # Only write the input record to the load file if the MGI ID was
+        # not added to the dictionary of rejected MGI IDs.
+        #
+        if not badMGIIDs.has_key(mgiID):
+            fpLoadFile.write(line)
+
+    fpCoord.close()
+    fpLoadFile.close()
+
+
+#
 # Main
 #
 checkArgs()
@@ -1049,8 +1063,7 @@ createBuildReport()
 closeFiles()
 
 if liveRun == "1":
-    #createCoordLoadFile()
-    print 'this is a live run'
+    createCoordLoadFile()
 
 # always display the source/display report name
 #fpRptNamesRpt.write(sourceDisplayRptFile + NL)

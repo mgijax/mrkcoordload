@@ -453,15 +453,4 @@ date >> ${LOG}
 #
 rm -f ${INPUT_FILE_BCP} 
 
-#
-# If this is a "live" run, move the QC-ready coordinate file to the
-# load-ready coordinate file. Otherwise, remove it.
-#
-if [ ${LIVE_RUN} -eq 1 ]
-then
-    mv ${INPUT_FILE_QC} ${INPUT_FILE_LOAD}
-else
-    rm -f ${INPUT_FILE_QC}
-fi
-
 exit ${RC}
