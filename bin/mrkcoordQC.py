@@ -804,9 +804,9 @@ def createNonMirnaMarkerReport ():
     print 'Create the non-miRNA marker report'
     fpNonMirnaMrkRpt.write(string.center('Non-miRNA Marker Report',108) + NL)
     fpNonMirnaMrkRpt.write(string.center('(' + timestamp + ')',108) + 2*NL)
-    fpNonMirnaMrkRpt.write('%-16s  %-30s  %-16s%s' %
+    fpNonMirnaMrkRpt.write('%-16s  %-50s  %-16s%s' %
                      ('MGI ID','Feature Type','miRBase ID',NL))
-    fpNonMirnaMrkRpt.write(16*'-' + '  ' + 30*'-' + '  ' + 16*'-' + NL)
+    fpNonMirnaMrkRpt.write(16*'-' + '  ' + 50*'-' + '  ' + 16*'-' + NL)
 
     cmds = []
 
@@ -838,7 +838,7 @@ def createNonMirnaMarkerReport ():
         mirbaseID = r['mirbaseID']
         featureType = r['term']
 
-        fpNonMirnaMrkRpt.write('%-16s  %-30s  %-16s%s' %
+        fpNonMirnaMrkRpt.write('%-16s  %-50s  %-16s%s' %
             (mgiID, featureType, mirbaseID, NL))
 
     numErrors = len(results[0])
