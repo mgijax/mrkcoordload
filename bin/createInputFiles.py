@@ -66,10 +66,8 @@ import mgi_utils
 TAB = '\t'
 CRT = '\n'
 
-# curated marker coordinate file
-## Change INPUT_FILE_DEFAULT to INPUT_FILE_LOAD
-## when we start running QC checks from the load
-inputFile = os.environ['INPUT_FILE_DEFAULT']
+# load ready file - line rejects removed by QC process
+inputFile = os.environ['INPUT_FILE_LOAD']
 
 # US 35 - create assocload file for mirbase id/marker associations
 mirbaseAssocFile = os.environ['MIRBASE_ASSOC_FILE']

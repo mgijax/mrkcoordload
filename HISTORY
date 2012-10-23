@@ -1,3 +1,11 @@
+TAG: mrkcoordload-5-0-0-13
+DATE: 10/23/2012
+STAFF: sc
+RELEASE: dev
+CHANGES: createInputFiles.py - update to  use INPUT_FILE_LOAD
+	(from INPUT_FILE_DEFAULT which was being used prior
+	to the QC scripts creating INPUT_FILE_LOAD)
+
 TAG: mrkcoordload-5-0-0-12
 DATE: 10/15/2012
 STAFF: sc
