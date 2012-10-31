@@ -11,7 +11,7 @@
 
   Env Vars:
 
-  Inputs: tab delimited file with the following columns:
+  Inputs: tab delimited file with the 8 columns:
 	1. MGI ID 
 	2. Chr
 	3. start coordinate
@@ -19,7 +19,7 @@
 	5. strand
 	6. collection name
 	7. collection abbreviation
-
+	8. comma separated list of miRBase IDs
   Outputs: 
 	Tab delimited files in coordload format, one for each collection
         1. MGI ID 
@@ -34,7 +34,7 @@
 	2. miRBase
 	data rows:
 	1. MGI ID 
-	2. miRBase ID
+	2. comma separated list of miRBase IDs
 
   Assumes:
 	QC process detects:
@@ -97,39 +97,45 @@ def init():
     fpMirbaseAssoc.write('MGI%smiRBase%s' % (TAB, CRT))
     user = os.environ['MGD_DBUSER']
     passwordFileName = os.environ['MGD_DBPASSWORDFILE']
-    
     db.useOneConnection(1)
     db.set_sqlUser(user)
     db.set_sqlPasswordFromFile(passwordFileName)
     db.useOneConnection(0)
-
 # US 35 - create assocload file for mirbase id/marker associations
-def processMirbase(mgiID, mbID):
+#	  delete all marker associations to mbID
+# US 175 - delete all mirbase IDs from  marker 'mgiID'
+#	   write a line to the assocload file if 'mbiIDs' not empty
+def processMirbase(mgiID, mbIDs):
     #
-    # Delete association to all markers associated with 'mbId'
+    # Delete association mirbase associations to mgiID - some won't exist
+    # If mbIDs = '', could be a miRNA marker that we want to delete miRBase
+    #    ids from
     #
-    results = db.sql('''select a1._Accession_key as aKey, a2.accid as mgiID
-	    from ACC_Accession a1, ACC_Accession a2
-	    where a1._MGIType_key = 2
-	    and a1._LogicalDB_key = 83
-	    and a1.accid = '%s' 
-	    and a1._Object_key = a2._Object_key
-	    and a2._MGIType_key = 2
-	    and a2._LogicalDB_key = 1
-	    and a2.preferred = 1
-	    and a2.prefixPart = 'MGI:' ''' % mbID, 'auto')
+    db.useOneConnection(1)
+    db.sql('''select a1._Accession_key as aKey, a1._Object_key as _Marker_key, a1.accid as mbID
+	into #mirbase
+	from ACC_Accession a1
+	where a1._MGIType_key = 2
+	and a1._LogicalDB_key = 83''', None)
+    db.sql('create index idx1 on #mirbase(_Marker_key)', None)
+    results = db.sql('''select m.aKey, m.mbID
+	from #mirbase m, ACC_Accession a
+	where m._Marker_key = a._Object_key
+	and a._MGIType_key = 2
+	and a._LogicalDB_key = 1
+	and a.accid = '%s' ''' % mgiID, 'auto')
+    db.useOneConnection(0)
     for r in results:
-	#print 'deleting mirbaseID %s association with %s' % (mbID, r['mgiID'])
 	deleteAccession(r['aKey'])
 
     # write out to assocload input file
-    fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbID, CRT))
+    if mbIDs != '':
+	fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbIDs, CRT))
 
     return
 
 def deleteAccession(aKey):
 	# delete from ACC_AccessionReference first
-	#print 'deleting aKey: %s' % aKey
 	db.sql('''delete from ACC_AccessionReference
 	    where _Accession_key = %s''' % aKey, None)
 	db.sql('''delete from ACC_Accession
@@ -137,6 +143,7 @@ def deleteAccession(aKey):
 	return
 
 # US 35 - input file now has 8 columns, the 8th being MiRBase ID, optional
+# US 175: column 8 now comma delimited list of miRBase IDs, optional
 def readInput():
     global inputDict, collectionList
 
@@ -150,18 +157,16 @@ def readInput():
     # discard the header line
     junk = fpInput.readline()
     for r in fpInput.readlines():
-	#print 'r: %s' % r
 	# create list of columns
 	columnList = r.split(TAB)
-	if len(columnList) < 7:
+	if len(columnList) < 8:
 	    sys.exit ('error in input line: %s' % r)
 
-        # US 35 - get mgiID column
+        # US 175 - mgID column no multivalued. New requirement: delete 
+	# all 
         mgiID = columnList[0].strip()
-	mbID = columnList[7].strip()
-	if mbID != '':
-	    #print 'calling processMirbase and sending %s and %s' % (mgiID, mbID)
-	    processMirbase(mgiID, mbID)
+	mbIDs = columnList[7].strip()
+	processMirbase(mgiID, mbIDs)
 
 	# add the coordinates to dictionary by collectin and abbrev
         # for later processing
@@ -169,7 +174,6 @@ def readInput():
 	abbrev = columnList[6].strip()
 
 	key = '%s~%s' % (collection, abbrev)
-	#print 'col/abbrev key: %s' % key
 
 	# remove the collection and abbrev columns from the list
 	columnList = columnList[:-2]
@@ -190,7 +194,6 @@ def writeFiles():
 	# e.g. c: MGI QTL~MGI
 	suffix = c.replace(' ', '_')
 	fileName = '%s.%s' % (coordFileRoot, suffix)
-	#print 'fileName: %s' % fileName
 	try:
 	    fp2 = open(fileName, 'w')
 	except:
@@ -209,7 +212,6 @@ def postprocess():
     global fpMirbaseAssoc
 
     fpMirbaseAssoc.close()
-
 #
 # Main
 # 
