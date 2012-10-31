@@ -1063,10 +1063,12 @@ def createMirbaseOtherMrkReport():
 
     print 'Create the miRBase IDs associated with other markers report'
     db.useOneConnection(0)
-    fpMirbaseOtherMrkRpt.write(string.center('Tab-delimited Report of miRBase IDs in the Input Associated with Different Markers in MGI',108) + NL)
+
+    fpMirbaseOtherMrkRpt.write(string.center('miRBase IDs in the Input Associated with Different Markers in MGI Report',108) + NL)
     fpMirbaseOtherMrkRpt.write(string.center('(' + timestamp + ')',108) + 2*NL)
-    fpMirbaseOtherMrkRpt.write('%s%s%s%s%s%s' %
-                     (' Input miRBase ID', TAB, ' Input MGI IDs', TAB, ' Database MGI IDs', NL))
+    fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' %
+                     ('Input miRBase ID','Input MGI IDs', 'Database MGI IDs',NL))
+    fpMirbaseOtherMrkRpt.write(16*'-' + '  ' + 40*'-' + '  ' + 40*'-' + NL)
  
     numErrors = 0
     for mbID in mb2mgiInInputDict.keys():
@@ -1114,7 +1116,8 @@ def createMirbaseOtherMrkReport():
 	    #
 	    for id in diffSet:
 		dbData.append(id)
-	    fpMirbaseOtherMrkRpt.write('%s%s%s%s%s%s' % (mbID, TAB, string.join(inputData, ', '), TAB, string.join(dbData, ', '), NL) )
+	    
+	    fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' % (mbID, string.join(inputData, ', '), string.join(dbData, ', '), NL))
 
     errorCount += numErrors
     fpMirbaseOtherMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
