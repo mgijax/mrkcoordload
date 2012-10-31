@@ -382,7 +382,6 @@ def loadTempTables ():
 	a = t.split('=')
 	if a[0].strip().lower() == 'build':
 	    build = a[1].strip()
-    #print 'build: %s' % build
     count = 1
     writeInvcoordStrandHeader()
     for line in fpCoord.readlines():
@@ -783,7 +782,6 @@ def createChrDiscrepReport ():
 def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, source):
     global errorCount, errorReportNames, coordErrorCount, badMGIIDs
 
-    print 'Create the invalid coordinate and strand report'
     numErrors = 0    
     if len(re.findall('[^0-9]',startCoordinate)) > 0:
 	numErrors += 1
@@ -1063,21 +1061,12 @@ def createMirbaseOtherMrkReport():
 	    mb2mgiInDbDict[mbID] = []
 	mb2mgiInDbDict[mbID].append(mgiID)
 
-    # DEBUG
-    print 'checking MI0000255'
-    if mb2mgiInDbDict.has_key('MI0000255'):
-	print  mb2mgiInDbDict['MI0000255']
-    print 'checking MI0007613'
-    if mb2mgiInDbDict.has_key('MI0007613'):
-        print  mb2mgiInDbDict['MI0007613']
-
     print 'Create the miRBase IDs associated with other markers report'
     db.useOneConnection(0)
-    fpMirbaseOtherMrkRpt.write(string.center('miRBase IDs  in the Input Associated with Different Markers in MGI Report',108) + NL)
+    fpMirbaseOtherMrkRpt.write(string.center('Tab-delimited Report of miRBase IDs in the Input Associated with Different Markers in MGI',108) + NL)
     fpMirbaseOtherMrkRpt.write(string.center('(' + timestamp + ')',108) + 2*NL)
-    fpMirbaseOtherMrkRpt.write('%-16s  %-30s  %-30s%s' %
-                     ('Input miRBase ID', 'Input MGI IDs', 'Database MGI IDs', NL))
-    fpMirbaseOtherMrkRpt.write(100*'-' + NL)
+    fpMirbaseOtherMrkRpt.write('%s%s%s%s%s%s' %
+                     (' Input miRBase ID', TAB, ' Input MGI IDs', TAB, ' Database MGI IDs', NL))
  
     numErrors = 0
     for mbID in mb2mgiInInputDict.keys():
@@ -1125,8 +1114,8 @@ def createMirbaseOtherMrkReport():
 	    #
 	    for id in diffSet:
 		dbData.append(id)
-	    reportLine = '%s%s%s%s%s%s' % (mbID, TAB, string.join(inputData, ', '), TAB, string.join(dbData, ', '), NL)
-	    fpMirbaseOtherMrkRpt.write(reportLine)
+	    fpMirbaseOtherMrkRpt.write('%s%s%s%s%s%s' % (mbID, TAB, string.join(inputData, ', '), TAB, string.join(dbData, ', '), NL) )
+
     errorCount += numErrors
     fpMirbaseOtherMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
     if numErrors > 0:

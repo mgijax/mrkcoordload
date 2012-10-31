@@ -192,7 +192,7 @@ checkHeader ()
     echo "Invalid Header" >> ${REPORT}
     echo "---------------" >> ${REPORT}
     header=`head -1 ${INPUT_FILE}`
-    if [ "`head -1 ${INPUT_FILE} | grep -i 'build='`" = "" ]
+    if [ "`head -1 ${INPUT_FILE} | grep -i '^build='`" = "" ]
     then
 	echo ${header} >> ${REPORT}
 	return 1
