@@ -1,3 +1,16 @@
+TAG: mrkcoordload-5-0-0-14
+DATE: 10/31/2012
+STAFF: sc
+RELEASE: dev C4AM/B38
+CHANGES: US 175 - n-m mirbase IDs
+1) mrkcoordload.sh - rm checkMirbaseIDS function (this functionality moved to 
+     mrkcoordQC.py), added mirbase dup and other mkr reports to RPT_LIST
+2) index.html - added
+3) mrkcoordload.config.default - added mirbase dup and other mkr reports
+4) createInputFiles.py - delete mirbase ID only from marker in input NOT from
+	all markers in DB. Commented that column 8 may now be multi-valued
+5) mrkcoordQC.py - added mirbase dup and other mkr reports, updated the delete report
+
 TAG: mrkcoordload-5-0-0-13
 DATE: 10/23/2012
 STAFF: sc
