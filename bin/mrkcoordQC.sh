@@ -145,6 +145,8 @@ then
     INVALID_COORD_STRAND_RPT=${CURRENTDIR}/`basename ${INVALID_COORD_STRAND_RPT}`
     NON_MIRNA_MARKER_RPT=${CURRENTDIR}/`basename ${NON_MIRNA_MARKER_RPT}`
     MIRBASE_DELETE_RPT=${CURRENTDIR}/`basename ${MIRBASE_DELETE_RPT}`
+    MIRBASE_DUP_RPT=${CURRENTDIR}/`basename ${MIRBASE_DUP_RPT}`
+    MIRBASE_OTHER_MKR_RPT=${CURRENTDIR}/`basename ${MIRBASE_OTHER_MKR_RPT}`
     SOURCE_DISPLAY_RPT=${CURRENTDIR}/`basename ${SOURCE_DISPLAY_RPT}`
     BUILD_RPT=${CURRENTDIR}/`basename ${BUILD_RPT}`
     RPT_NAMES_RPT=${CURRENTDIR}/`basename ${RPT_NAMES_RPT}`
@@ -161,7 +163,7 @@ touch ${LOG}
 #
 # Initialize the report files to make sure the current user can write to them.
 #
-RPT_LIST="${SANITY_RPT} ${INVALID_MARKER_RPT} ${SEC_MARKER_RPT} ${INVALID_CHR_RPT} ${CHR_DISCREP_RPT} ${INVALID_COORD_STRAND_RPT} ${NON_MIRNA_MARKER_RPT} ${MIRBASE_DELETE_RPT} ${SOURCE_DISPLAY_RPT} ${BUILD_RPT} ${RPT_NAMES_RPT}"
+RPT_LIST="${SANITY_RPT} ${INVALID_MARKER_RPT} ${SEC_MARKER_RPT} ${INVALID_CHR_RPT} ${CHR_DISCREP_RPT} ${INVALID_COORD_STRAND_RPT} ${NON_MIRNA_MARKER_RPT} ${MIRBASE_DELETE_RPT} ${MIRBASE_DUP_RPT} ${MIRBASE_OTHER_MKR_RPT} ${SOURCE_DISPLAY_RPT} ${BUILD_RPT} ${RPT_NAMES_RPT}"
 
 for i in ${RPT_LIST}
 do
@@ -286,27 +288,6 @@ checkMGIIDS ()
 }
 
 #
-# FUNCTION: Check the miRBase ID column for duplicates and write the field
-#           value to the sanity report.
-#
-checkMirbaseIDS ()
-{
-    FILE=$1         # The input file to check
-    REPORT=$2       # The sanity report to write to
-
-    echo "\n\nDuplicate miRBase IDs" >> ${REPORT}
-    echo "-------------------------" >> ${REPORT}
-    cut -d'	' -f8 ${FILE} | grep "^MI" | sort | uniq -d > ${TMP_FILE}
-    cat ${TMP_FILE} >> ${REPORT}
-    if [ `cat ${TMP_FILE} | wc -l` -eq 0 ]
-    then
-        return 0
-    else
-        return 1
-    fi
-}
-
-#
 # Run sanity checks on the gene model input file.
 #
 echo "" >> ${LOG}
@@ -339,12 +320,6 @@ then
 fi
 
 checkMGIIDS ${INPUT_FILE_QC} ${SANITY_RPT}
-if [ $? -ne 0 ]
-then
-    FILE_ERROR=1
-fi
-
-checkMirbaseIDS ${INPUT_FILE_QC} ${SANITY_RPT}
 if [ $? -ne 0 ]
 then
     FILE_ERROR=1
