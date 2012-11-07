@@ -1,3 +1,11 @@
+TAG: mrkcoordload-5-1-1-1
+DATE: 11/07/2012
+STAFF: sc
+RELEASE: dev C4AM/B38
+CHANGES: US 175 - n-m mirbase IDs
+1) bin/mrkcoordQC.py - other mkr report, tab-delim and add 'tab-delim' to report header
+2) bin/mrkcoordQC.sh - build= must start header line
+
 TAG: mrkcoordload-5-0-0-14
 DATE: 10/31/2012
 STAFF: sc
