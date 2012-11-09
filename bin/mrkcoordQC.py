@@ -965,7 +965,7 @@ def createMirbaseDeleteReport ():
 	if mgi2mbInDbDict.has_key(inputMgiID):
 	    dbInfo = mgi2mbInDbDict[inputMgiID]
 	else:
-	    print '%s not in database' % inputMgiID
+	    #print '%s not in database' % inputMgiID
 	    continue
 	symbol = dbInfo[0]
 	dbMbID = []
@@ -1085,7 +1085,7 @@ def createMirbaseOtherMrkReport():
 	if mb2mgiInDbDict.has_key(mbID):
 	    mgiIdInDbList = mb2mgiInDbDict[mbID]
 	else:
-	    print '%s not associate with marker in the database' % mbID
+	    #print '%s not associate with marker in the database' % mbID
 	    continue
 
 	#
@@ -1096,10 +1096,10 @@ def createMirbaseOtherMrkReport():
 	diffSet = set(mgiIdInDbList).difference(set(mgiIdInInputList))
 
 	# DEBUG
-	print 'mbID: %s' % mbID
-	print 'mgiIdInDbList: %s' % mgiIdInDbList
-	print 'mgiIdInInputList: %s' % mgiIdInInputList
-	print 'diffSet: %s' % diffSet
+	#print 'mbID: %s' % mbID
+	#print 'mgiIdInDbList: %s' % mgiIdInDbList
+	#print 'mgiIdInInputList: %s' % mgiIdInInputList
+	#print 'diffSet: %s' % diffSet
 
 	# report mgiIDs for mbID in the db that are not in the input
 	if diffSet:
