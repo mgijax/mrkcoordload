@@ -1,3 +1,12 @@
+TAG: mrkcoordload-5-1-1-3
+DATE: 11/12/2012
+STAFF: sc
+RELEASE: C4AM/B38
+1) mrkcoordQC.sh - change temp table column mirbaseID to text
+2) mrkcoordQC.py - change non-mirna report temp table query to
+    use 'like "%MI%"' instead of 'is not null' as may only use
+    like for a text field in where clause
+
 TAG: mrkcoordload-5-1-1-2
 DATE: 11/09/2012
 STAFF: sc

@@ -852,11 +852,14 @@ def createNonMirnaMarkerReport ():
     # associated with a miRBase ID, but the marker does not have a
     # "miRNA gene" feature type.
     #
+    # we use tc.mirbaseID like "%MI%" because mirbaseID is a text field
+    #  and only like is allowed for a text field in the where clause 
+    #
     cmds.append('select tc.mgiID, tc.mirbaseID, m.term ' + \
                 'from tempdb..' + coordTempTable + ' tc, ' + \
                      'ACC_Accession a, ' + \
                      'MRK_MCV_Cache m ' + \
-                'where tc.mirbaseID is not null and ' + \
+                'where tc.mirbaseID like "%MI%" and ' + \
                       'tc.mgiID = a.accID and ' + \
                       'a._MGIType_key = 2 and ' + \
                       'a._LogicalDB_key = 1 and ' + \

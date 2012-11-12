@@ -343,6 +343,10 @@ fi
 #
 # Create temp tables for the input data.
 #
+# we use a text field for mirbaseID because this field can be > 255 and our sybaselib does not allow
+# varchar or char > 255 even though sybase 12.5 does
+#
+
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create temp tables for the input data" >> ${LOG}
@@ -359,7 +363,7 @@ create table ${TEMP_TABLE} (
     strand char(1) null,
     provider varchar(255) not null,
     display varchar(255) not null,
-    mirbaseID varchar(80) null,
+    mirbaseID text null,
     buildValue varchar(30) not null
 )
 go
