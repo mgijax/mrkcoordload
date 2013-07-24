@@ -30,7 +30,7 @@ export CONFIG_MASTER
 
 JAVARUNTIMEOPTS="-Xms1500m -Xmx1500m"
 
-JAVA_LIB=${MGI_JAVALIB}/core.jar:${MGI_JAVALIB}/dbsmgd.jar:${MGI_JAVALIB}/lib_java_dbsrdr/dbsrdr.jar:${MGI_JAVALIB}/dla.jar
+JAVA_LIB=${MGI_JAVALIB}/core.jar:${MGI_JAVALIB}/dbsmgd.jar:${MGI_JAVALIB}/dbsrdr.jar:${MGI_JAVALIB}/dla.jar
 
 CLASSPATH=.:${JAVA_LIB}:${COMMON_CLASSPATH}
 
