@@ -1,3 +1,11 @@
+TAG: mrkcoordload-5-1-7-1
+DATE: 03/16/2014
+STAFF: sc
+CHANGES:
+1) Bug whereby TABs were allowed in the header which specifies version (build)
+   in the load ready file. QC was stripping, but original was being written
+   to load ready file
+
 TAG: mrkcoordload-5-1-4-1
 DATE: 07/27/2013
 STAFF: dbm

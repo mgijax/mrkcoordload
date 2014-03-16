@@ -367,7 +367,7 @@ def closeFiles ():
 #
 
 def loadTempTables ():
-    global build, mb2mgiInInputDict
+    global build, mb2mgiInInputDict, header
 
     print 'Create a bcp file from the coordinate input file'
     sys.stdout.flush()
@@ -376,7 +376,10 @@ def loadTempTables ():
     # Read each record from the coordinate input file, perform validation
     # checks and write them to a bcp file.
     #
-    header = fpCoord.readline()
+    
+    # set the global header value; remove any tabs, preserve newline
+    header = '%s\n' % fpCoord.readline().strip() 
+
     tokens = header.split(';')
     for t in tokens:
 	a = t.split('=')
@@ -1213,8 +1216,9 @@ def createCoordLoadFile ():
     except:
         print 'Cannot open output file: ' + coordLoadFile
         sys.exit(1)
-
-    header = fpCoord.readline()
+    
+    # remove header line - use global header with tabs removed
+    junk = fpCoord.readline()
     fpLoadFile.write(header)
     for line in fpCoord.readlines():
         tokens = re.split(TAB, line[:-1])
