@@ -210,7 +210,9 @@ checkDupLines ()
     FILE=$1    # The input file to check
     REPORT=$2  # The sanity report to write to
 
-    echo "\n\nDuplicate Lines" >> ${REPORT}
+    echo "" >> ${REPORT}
+    echo "" >> ${REPORT}
+    echo "Duplicate Lines" >> ${REPORT}
     echo "---------------" >> ${REPORT}
     sort ${FILE} | uniq -d > ${TMP_FILE}
     cat ${TMP_FILE} >> ${REPORT}
@@ -233,7 +235,9 @@ checkDupFields ()
     FIELD_NUM=$3    # The field number to check
     FIELD_NAME=$4   # The field name to show on the sanity report
 
-    echo "\n\nDuplicate ${FIELD_NAME}" >> ${REPORT}
+    echo "" >> ${REPORT}
+    echo "" >> ${REPORT}
+    echo "Duplicate ${FIELD_NAME}" >> ${REPORT}
     echo "------------------------------" >> ${REPORT}
     cut -d'	' -f${FIELD_NUM} ${FILE} | sort | uniq -d > ${TMP_FILE}
     cat ${TMP_FILE} >> ${REPORT}
@@ -254,7 +258,10 @@ checkColumns ()
     FILE=$1         # The input file to check
     REPORT=$2       # The sanity report to write to
     NUM_COLUMNS=$3  # The number of columns expected in each input record
-    echo "\n\nLines With Missing Columns or Data" >> ${REPORT}
+
+    echo "" >> ${REPORT}
+    echo "" >> ${REPORT}
+    echo "Lines With Missing Columns or Data" >> ${REPORT}
     echo "-----------------------------------" >> ${REPORT}
     ${MRKCOORDLOAD}/bin/checkColumns.py ${FILE} ${NUM_COLUMNS} > ${TMP_FILE}
     cat ${TMP_FILE} >> ${REPORT} 
@@ -274,7 +281,10 @@ checkMGIIDS ()
 {
     FILE=$1         # The input file to check
     REPORT=$2       # The sanity report to write to
-    echo "\n\nBad MGI ID" >> ${REPORT}
+
+    echo "" >> ${REPORT}
+    echo "" >> ${REPORT}
+    echo "Bad MGI ID" >> ${REPORT}
     echo "---------------" >> ${REPORT}
     # get the first column excluding the header which contains '='
     cat ${FILE} | grep -v '=' | grep -i -v '^MGI:' > ${TMP_FILE}

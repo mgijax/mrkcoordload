@@ -197,7 +197,8 @@ do
     MAIL_LOADNAME="${COORD_COLLECTION_NAME}, ${MAIL_LOADNAME}"
     export MAIL_LOADNAME
 
-     echo "\n`date`" >> ${LOG_DIAG}
+     echo "" >> ${LOG_DIAG}
+     echo "`date`" >> ${LOG_DIAG}
     echo "Running ${COORD_COLLECTION_NAME} mrkcoordload" | tee -a ${LOG_DIAG} ${LOG_PROC}
     ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
         -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD} \
@@ -214,7 +215,8 @@ done
 # If there are mirbase associations load them
 if [ `cat ${MIRBASE_ASSOC_FILE} | wc -l` -gt 1 ]
 then
-    echo "\n`date`" >> ${LOG_DIAG}
+    echo "" >> ${LOG_DIAG}
+    echo "`date`" >> ${LOG_DIAG}
     echo "Running association load" | tee -a ${LOG_DIAG} ${LOG_PROC}
     ${ASSOCLOADER_SH} ${CONFIG_LOAD} ${ASSOCLOADCONFIG} >> ${LOG_DIAG}
     STAT=$?
