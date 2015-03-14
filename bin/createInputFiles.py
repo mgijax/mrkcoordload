@@ -113,17 +113,19 @@ def processMirbase(mgiID, mbIDs):
     #
     db.useOneConnection(1)
     db.sql('''select a1._Accession_key as aKey, a1._Object_key as _Marker_key, a1.accid as mbID
-	into #mirbase
+	into temp mirbase
 	from ACC_Accession a1
 	where a1._MGIType_key = 2
 	and a1._LogicalDB_key = 83''', None)
-    db.sql('create index idx1 on #mirbase(_Marker_key)', None)
+    db.sql('create index idx1 on mirbase(_Marker_key)', None)
     results = db.sql('''select m.aKey, m.mbID
-	from #mirbase m, ACC_Accession a
+	from mirbase m, ACC_Accession a
 	where m._Marker_key = a._Object_key
 	and a._MGIType_key = 2
 	and a._LogicalDB_key = 1
 	and a.accid = '%s' ''' % mgiID, 'auto')
+
+    db.sql('drop table mirbase', None)
     db.useOneConnection(0)
     for r in results:
 	deleteAccession(r['aKey'])
@@ -131,6 +133,7 @@ def processMirbase(mgiID, mbIDs):
     # write out to assocload input file
     if mbIDs != '':
 	fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbIDs, CRT))
+
 
     return
 
@@ -140,6 +143,7 @@ def deleteAccession(aKey):
 	    where _Accession_key = %s''' % aKey, None)
 	db.sql('''delete from ACC_Accession
 	    where _Accession_key = %s''' % aKey, None)
+	db.commit()
 	return
 
 # US 35 - input file now has 8 columns, the 8th being MiRBase ID, optional

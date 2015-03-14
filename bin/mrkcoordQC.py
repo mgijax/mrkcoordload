@@ -144,6 +144,8 @@ USAGE = 'mrkcoordQC.py coordinate_file'
 user = os.environ['MGI_PUBLICUSER']
 passwordFile = os.environ['MGI_PUBPASSWORDFILE']
 
+bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
+
 liveRun = os.environ['LIVE_RUN']
 
 coordBCPFile = os.environ['INPUT_FILE_BCP']
@@ -430,7 +432,9 @@ def loadTempTables ():
     print 'Load the coordinate data into the temp table: ' + coordTempTable
     sys.stdout.flush()
 
-    bcpCmd = 'cat %s | bcp tempdb..%s in %s -c -t"%s" -S%s -U%s' % (passwordFile, coordTempTable, coordBCPFile, TAB, db.get_sqlServer(), db.get_sqlUser())
+    bcpCmd = '%s %s %s %s "/" %s "\\t" "\\n" mgd' % \
+	(bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(),coordTempTable,
+	coordBCPFile)
     rc = os.system(bcpCmd)
     if rc <> 0:
         closeFiles()
@@ -482,17 +486,17 @@ def createInvMarkerReport ():
     # 3) Exist for a marker, but the status is not "offical" or "interim".
     #
     cmds.append('select tmp.mgiID, ' + \
-                       'null "name", ' + \
-                       'null "status" ' + \
-                'from tempdb..' + coordTempTable + ' tmp ' + \
+                       'null as name, ' + \
+                       'null as status ' + \
+                'from ' + coordTempTable + ' tmp ' + \
                 'where not exists (select 1 ' + \
                                   'from ACC_Accession a ' + \
                                   'where a.accID = tmp.mgiID) ' + \
                 'union ' + \
                 'select tmp.mgiID, ' + \
                        't.name, ' + \
-                       'null "status" ' + \
-                'from tempdb..' + coordTempTable + ' tmp, ' + \
+                       'null as status ' + \
+                'from ' + coordTempTable + ' tmp, ' + \
                      'ACC_Accession a1, ' + \
                      'ACC_MGIType t ' + \
                 'where a1.accID = tmp.mgiID and ' + \
@@ -508,7 +512,7 @@ def createInvMarkerReport ():
                 'select tmp.mgiID, ' + \
                        't.name, ' + \
                        'ms.status ' + \
-                'from tempdb..' + coordTempTable + ' tmp, ' + \
+                'from ' + coordTempTable + ' tmp, ' + \
                      'ACC_Accession a, ' + \
                      'ACC_MGIType t, ' + \
                      'MRK_Marker m, ' + \
@@ -520,7 +524,7 @@ def createInvMarkerReport ():
                       'a._Object_key = m._Marker_key and ' + \
                       'm._Marker_Status_key not in (1,3) and ' + \
                       'm._Marker_Status_key = ms._Marker_Status_key ' + \
-                'order by tmp.mgiID')
+                'order by mgiID')
 
     results = db.sql(cmds,'auto')
 
@@ -595,7 +599,7 @@ def createSecMarkerReport ():
     cmds.append('select tmp.mgiID, ' + \
                        'm.symbol, ' + \
                        'a2.accID ' + \
-                'from tempdb..' + coordTempTable + ' tmp, ' + \
+                'from ' + coordTempTable + ' tmp, ' + \
                      'ACC_Accession a1, ' + \
                      'ACC_Accession a2, ' + \
                      'MRK_Marker m ' + \
@@ -608,7 +612,7 @@ def createSecMarkerReport ():
                       'a2._LogicalDB_key = 1 and ' + \
                       'a2.preferred = 1 and ' + \
                       'a2._Object_key = m._Marker_key ' + \
-                'order by tmp.mgiID')
+                'order by mgiID')
 
     results = db.sql(cmds,'auto')
     #
@@ -669,7 +673,7 @@ def createInvChrReport ():
                        tc.chromosome,
                        tc.mgiID,
                        m.symbol
-                from tempdb..%s tc,
+                from %s tc,
                      ACC_Accession a,
                      MRK_Marker m
                 where tc.mgiID = a.accID
@@ -681,7 +685,7 @@ def createInvChrReport ():
 		    from MRK_Chromosome mc
 		    where mc._Organism_key = 1
 		    and mc.chromosome != 'UN')
-                order by tc.mgiID''' % coordTempTable, 'auto')
+                order by mgiID''' % coordTempTable, 'auto')
 
     #
     # Write the records to the report.
@@ -743,7 +747,7 @@ def createChrDiscrepReport ():
                        tc.chromosome as fChr, 
                        m.symbol, 
                        m.chromosome as mChr
-                from tempdb..%s tc, 
+                from %s tc, 
                      ACC_Accession a, 
                      MRK_Marker m 
                 where tc.chromosome not in (%s)
@@ -753,7 +757,7 @@ def createChrDiscrepReport ():
                 and a.preferred = 1 
                 and a._Object_key = m._Marker_key 
                 and m.chromosome != tc.chromosome 
-                order by tc.mgiID''' % (coordTempTable, ic), 'auto')
+                order by mgiID''' % (coordTempTable, ic), 'auto')
 
 
     #
@@ -859,7 +863,7 @@ def createNonMirnaMarkerReport ():
     #  and only like is allowed for a text field in the where clause 
     #
     cmds.append('select tc.mgiID, tc.mirbaseID, m.term ' + \
-                'from tempdb..' + coordTempTable + ' tc, ' + \
+                'from ' + coordTempTable + ' tc, ' + \
                      'ACC_Accession a, ' + \
                      'MRK_MCV_Cache m ' + \
                 'where tc.mirbaseID like "%MI%" and ' + \
@@ -870,7 +874,7 @@ def createNonMirnaMarkerReport ():
                       'a._Object_key = m._Marker_key and ' + \
                       'm.qualifier = "D" and ' + \
                       'm.term != "miRNA gene" ' + \
-                'order by tc.mgiID')
+                'order by mgiID')
 
     results = db.sql(cmds,'auto')
     #
@@ -917,7 +921,7 @@ def createMirbaseDeleteReport ():
     #
     db.useOneConnection(1)
     db.sql('''select a.accid as mgiID, m._Marker_key, m.symbol
-	into #mkrs
+	into temp mkrs
 	from ACC_Accession a, MRK_Marker m
 	where m._Organism_key = 1
 	and m._Marker_Status_key in (1,3)
@@ -926,12 +930,14 @@ def createMirbaseDeleteReport ():
 	and a._LogicalDB_key = 1
 	and a.prefixPart = 'MGI:' ''', None)
 
-    db.sql('create index idx1 on #mkrs(_Marker_key)', None)
+    db.sql('create index idx1 on mkrs(_Marker_key)', None)
 
     results = db.sql('''select m.*, a.accid as mbID
-	from #mkrs m, ACC_Accession a
-	where m._Marker_key *= a._Object_key
-	and a._MGIType_key = 2
+	from mkrs m 
+	left outer join
+	ACC_Accession a on
+		m._marker_key=a._object_key
+	where a._MGIType_key = 2
 	and a._LogicalDB_key = 83''', 'auto')
 
     for r in results:
@@ -944,7 +950,7 @@ def createMirbaseDeleteReport ():
 	    mgi2mbInDbDict[mgiID].append(mbID)
 	
     results = db.sql('''select mgiID, mirbaseID
-	from tempdb..%s''' % coordTempTable, 'auto')
+	from %s''' % coordTempTable, 'auto')
     #
     # Write the records to the report.
     #
@@ -988,6 +994,8 @@ def createMirbaseDeleteReport ():
 	if deletedMbID:
 	    numErrors += 1
 	    fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' % (inputMgiID, symbol, string.join(addedMbID, ', '), string.join(deletedMbID, ', '), NL))
+
+    db.sql('drop table mkrs', None)
     db.useOneConnection(0)
     fpMirbaseDeleteRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -1043,7 +1051,7 @@ def createMirbaseOtherMrkReport():
     print 'Create the miRBase ID associated with other marker report'
     db.useOneConnection(1)
     db.sql('''select a.accid as mgiID, mm._Marker_key
-        into #mkrs
+        into temp mkrs
         from ACC_Accession a, MRK_Marker mm, MRK_Location_Cache m
         where mm._Organism_key = 1
         and mm._Marker_key =  m._Marker_key
@@ -1052,12 +1060,14 @@ def createMirbaseOtherMrkReport():
         and a._LogicalDB_key = 1
         and a.prefixPart = 'MGI:' ''', None)
 
-    db.sql('create index idx1 on #mkrs(_Marker_key)', None)
+    db.sql('create index idx1 on mkrs(_Marker_key)', None)
 
     results = db.sql('''select m.*, a.accid as mbID
-        from #mkrs m, ACC_Accession a
-        where m._Marker_key *= a._Object_key
-        and a._MGIType_key = 2
+        from mkrs m 
+	left outer join
+	 ACC_Accession a on
+		m._marker_key=a._object_key
+        where a._MGIType_key = 2
         and a._LogicalDB_key = 83''', 'auto')
 
     for r in results:
@@ -1068,6 +1078,7 @@ def createMirbaseOtherMrkReport():
 	mb2mgiInDbDict[mbID].append(mgiID)
 
     print 'Create the miRBase IDs associated with other markers report'
+    db.sql('drop table mkrs', None)
     db.useOneConnection(0)
 
     fpMirbaseOtherMrkRpt.write(string.center('miRBase IDs in the Input Associated with Different Markers in MGI Report',108) + NL)

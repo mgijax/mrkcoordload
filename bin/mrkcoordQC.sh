@@ -360,10 +360,7 @@ fi
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create temp tables for the input data" >> ${LOG}
-cat - <<EOSQL | isql -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGI_PUBLICUSER} -P`cat ${MGI_PUBPASSWORDFILE}` -e  >> ${LOG}
-
-use tempdb
-go
+cat - <<EOSQL | psql -h${PG_DBSERVER} -d${PG_DBNAME} -U mgd_dbo -e  >> ${LOG}
 
 create table ${TEMP_TABLE} (
     mgiID varchar(80) not null,
@@ -375,19 +372,14 @@ create table ${TEMP_TABLE} (
     display varchar(255) not null,
     mirbaseID text null,
     buildValue varchar(30) not null
-)
-go
+);
 
-create nonclustered index idx_mgiID on ${TEMP_TABLE} (mgiID)
-go
+create index idx_mgiID on ${TEMP_TABLE} (mgiID);
 
-create nonclustered index idx_chromosome on ${TEMP_TABLE} (chromosome)
-go
+create index idx_chromosome on ${TEMP_TABLE} (chromosome);
 
-grant all on ${TEMP_TABLE} to public
-go
+grant all on ${TEMP_TABLE} to public;
 
-quit
 EOSQL
 
 #
@@ -424,15 +416,10 @@ cat ${RPT_NAMES_RPT} | tee -a ${LOG}
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Drop the temp tables" >> ${LOG}
-cat - <<EOSQL | isql -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGI_PUBLICUSER} -P`cat ${MGI_PUBPASSWORDFILE}` -e  >> ${LOG}
+cat - <<EOSQL | psql -h${PG_DBSERVER} -d${PG_DBNAME} -U mgd_dbo -e  >> ${LOG}
 
-use tempdb
-go
+drop table ${TEMP_TABLE};
 
-drop table ${TEMP_TABLE}
-go
-
-quit
 EOSQL
 
 date >> ${LOG}
