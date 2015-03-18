@@ -415,9 +415,9 @@ def loadTempTables ():
 	    continue
 
         fpCoordBCP.write(mgiID + TAB + chromosome + TAB +
-                      startCoordinate + TAB + endCoordinate + TAB +
+                     startCoordinate + TAB + endCoordinate + TAB +
                       strand + TAB + source + TAB + display + TAB +
-                      miRBaseID + TAB + build + TAB + NL)
+                      miRBaseID + TAB + build + NL)
         count += 1
     writeInvcoordStrandFooter()
 
@@ -430,11 +430,14 @@ def loadTempTables ():
     # Load the temp tables with the input data.
     #
     print 'Load the coordinate data into the temp table: ' + coordTempTable
-    sys.stdout.flush()
 
     bcpCmd = '%s %s %s %s "/" %s "\\t" "\\n" mgd' % \
 	(bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(),coordTempTable,
 	coordBCPFile)
+
+    print 'bcp cmd = %s' % bcpCommand
+    sys.stdout.flush()
+
     rc = os.system(bcpCmd)
     if rc <> 0:
         closeFiles()
