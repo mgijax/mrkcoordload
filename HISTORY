@@ -1,3 +1,9 @@
+TAG: mrkcoordload-5-2-1-2
+DATE: 04/14/2015
+STAFF: dbm
+CHANGES:
+1) bin/mrkcoordload.sh: Use "head -n +1" to get the first line in the file.
+
 TAG: mrkcoordload-5-2-1-1
 DATE: 04/10/2015
 STAFF: lec
