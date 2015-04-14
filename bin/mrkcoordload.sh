@@ -141,7 +141,7 @@ export IFS
 ## We will want to update INPUT_FILE_DEFAULT to INPUT_FILE_LOAD
 ## when we are ready to run the qC reports from the load
 # Iterate thru tokens on first line delimited by IFS
-for l in `cut -f1 ${INPUT_FILE_LOAD}`
+for l in `cat ${INPUT_FILE_LOAD} | head -n +1`
 do
     # get key in lower case
     key=`echo $l | cut -d= -f1 | tr 'A-Z' 'a-z'`
