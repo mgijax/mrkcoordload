@@ -360,7 +360,7 @@ fi
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Create temp tables for the input data" >> ${LOG}
-cat - <<EOSQL | psql -h${PG_DBSERVER} -d${PG_DBNAME} -U mgd_dbo -e  >> ${LOG}
+cat - <<EOSQL | psql -h${MGD_DBSERVER} -d${MGD_DBNAME} -U mgd_dbo -e  >> ${LOG}
 
 create table ${TEMP_TABLE} (
     mgiID varchar(80) not null,
@@ -417,7 +417,7 @@ cat ${RPT_NAMES_RPT} | tee -a ${LOG}
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Drop the temp tables" >> ${LOG}
-cat - <<EOSQL | psql -h${PG_DBSERVER} -d${PG_DBNAME} -U mgd_dbo -e  >> ${LOG}
+cat - <<EOSQL | psql -h${MGD_DBSERVER} -d${MGD_DBNAME} -U mgd_dbo -e  >> ${LOG}
 
 drop table ${TEMP_TABLE};
 
