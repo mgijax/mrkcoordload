@@ -106,7 +106,7 @@ cleanDir ${OUTPUTDIR}
 LASTRUN_FILE=${INPUTDIR}/lastrun
 if [ -f ${LASTRUN_FILE} ]
 then
-    if /usr/local/bin/test ${LASTRUN_FILE} -nt ${INPUT_FILE_DEFAULT}
+    if test ${LASTRUN_FILE} -nt ${INPUT_FILE_DEFAULT}
     then
 
         echo "Input file has not been updated - skipping load" | tee -a ${LOG_PROC}
@@ -144,7 +144,7 @@ export IFS
 for l in `cat ${INPUT_FILE_LOAD} | head -n +1`
 do
     # get key in lower case
-    key=`echo $l | cut -d= -f1 | /usr/local/bin/tr 'A-Z' 'a-z'`
+    key=`echo $l | cut -d= -f1 | tr 'A-Z' 'a-z'`
     # get value as is
     value=`echo $l | cut -d= -f2`
     value=`echo $value`
