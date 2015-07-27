@@ -97,10 +97,9 @@ def init():
     fpMirbaseAssoc.write('MGI%smiRBase%s' % (TAB, CRT))
     user = os.environ['MGD_DBUSER']
     passwordFileName = os.environ['MGD_DBPASSWORDFILE']
-    db.useOneConnection(1)
     db.set_sqlUser(user)
     db.set_sqlPasswordFromFile(passwordFileName)
-    db.useOneConnection(0)
+
 # US 35 - create assocload file for mirbase id/marker associations
 #	  delete all marker associations to mbID
 # US 175 - delete all mirbase IDs from  marker 'mgiID'
@@ -111,7 +110,6 @@ def processMirbase(mgiID, mbIDs):
     # If mbIDs = '', could be a miRNA marker that we want to delete miRBase
     #    ids from
     #
-    db.useOneConnection(1)
     db.sql('''select a1._Accession_key as aKey, a1._Object_key as _Marker_key, a1.accid as mbID
 	into temp mirbase
 	from ACC_Accession a1
@@ -126,7 +124,6 @@ def processMirbase(mgiID, mbIDs):
 	and a.accid = '%s' ''' % mgiID, 'auto')
 
     db.sql('drop table mirbase', None)
-    db.useOneConnection(0)
     for r in results:
 	deleteAccession(r['aKey'])
 
@@ -135,16 +132,14 @@ def processMirbase(mgiID, mbIDs):
 	fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbIDs, CRT))
 
 
-    return
-
 def deleteAccession(aKey):
-	# delete from ACC_AccessionReference first
-	db.sql('''delete from ACC_AccessionReference
-	    where _Accession_key = %s''' % aKey, None)
-	db.sql('''delete from ACC_Accession
-	    where _Accession_key = %s''' % aKey, None)
-	db.commit()
-	return
+    print "Deleting _accession_key = %s" % aKey
+    # delete from ACC_AccessionReference first
+    db.sql('''delete from ACC_AccessionReference
+	where _Accession_key = %s''' % aKey, None)
+    db.sql('''delete from ACC_Accession
+	where _Accession_key = %s''' % aKey, None)
+
 
 # US 35 - input file now has 8 columns, the 8th being MiRBase ID, optional
 # US 175: column 8 now comma delimited list of miRBase IDs, optional
@@ -152,11 +147,7 @@ def readInput():
     global inputDict, collectionList
 
     # open the input file
-    try:
-	fpInput = open(inputFile, 'r')
-    except:
-	print 'Cannot open input file: %s ' % inputFile
-	sys.exit(1)
+    fpInput = open(inputFile, 'r')
 
     # discard the header line
     junk = fpInput.readline()
@@ -188,40 +179,47 @@ def readInput():
 
     # get the set of collections found in the input file
     collectionList = inputDict.keys()
+
 def writeFiles():
+    fp1 = open(coordFileListFile, 'w')
+
     try:
-	fp1 = open(coordFileListFile, 'w')
-    except:
-	print 'Cannot open output file: %s ' % coordFileListFile
-	sys.exit(1)
-    for c in collectionList:
-	# e.g. c: MGI QTL~MGI
-	suffix = c.replace(' ', '_')
-	fileName = '%s.%s' % (coordFileRoot, suffix)
-	try:
+	for c in collectionList:
+	    # e.g. c: MGI QTL~MGI
+	    suffix = c.replace(' ', '_')
+	    fileName = '%s.%s' % (coordFileRoot, suffix)
 	    fp2 = open(fileName, 'w')
-	except:
-	    print 'Cannot open output file: %s ' % fileName
-	    sys.exit(1)
-	# save the filename to a file for access by the wrapper
-	# which will iterate through them passing to coordload
-	fp1.write(fileName + CRT)
-	coordList = inputDict[c]
-	for l in coordList:
-	    fp2.write('\t'.join(l) + CRT)
-	fp2.close()
-    fp1.close()
+
+	    try:
+		# save the filename to a file for access by the wrapper
+		# which will iterate through them passing to coordload
+		fp1.write(fileName + CRT)
+		coordList = inputDict[c]
+		for l in coordList:
+		    fp2.write('\t'.join(l) + CRT)
+	    finally:
+		fp2.close()
+
+    finally:
+	fp1.close()
 
 def postprocess():
     global fpMirbaseAssoc
 
     fpMirbaseAssoc.close()
+
 #
 # Main
 # 
 
-init()
-readInput()
-writeFiles()
-postprocess()
-sys.exit(0)
+if __name__ == '__main__':
+
+    db.useOneConnection(1)
+    db.sql("begin transaction")
+
+    init()
+    readInput()
+    writeFiles()
+    postprocess()
+
+    db.commit()
