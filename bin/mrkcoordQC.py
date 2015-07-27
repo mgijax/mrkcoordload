@@ -17,8 +17,8 @@
 #      The following environment variables are set by the configuration
 #      files that are sourced by the wrapper script:
 #
-#          MGI_PUBLICUSER
-#          MGI_PUBPASSWORDFILE
+#          MGD_DBUSER
+#          MGD_DBPASSWORDFILE
 #          TEMP_TABLE
 #          INVALID_MARKER_RPT
 #          SEC_MARKER_RPT
@@ -141,8 +141,8 @@ USAGE = 'mrkcoordQC.py coordinate_file'
 #
 #  GLOBALS
 #
-user = os.environ['MGI_PUBLICUSER']
-passwordFile = os.environ['MGI_PUBPASSWORDFILE']
+user = os.environ['MGD_DBUSER']
+passwordFileName = os.environ['MGD_DBPASSWORDFILE']
 
 bcpCommand = os.environ['PG_DBUTILS'] + '/bin/bcpin.csh'
 
@@ -229,7 +229,7 @@ def init ():
     sys.stdout.flush()
 
     db.set_sqlUser(user)
-    db.set_sqlPasswordFromFile(passwordFile)
+    db.set_sqlPasswordFromFile(passwordFileName)
 
     return
 
