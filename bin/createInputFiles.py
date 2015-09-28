@@ -131,6 +131,7 @@ def processMirbase(mgiID, mbIDs):
     if mbIDs != '':
 	fpMirbaseAssoc.write('%s%s%s%s' % (mgiID, TAB, mbIDs, CRT))
 
+    db.commit()
 
 def deleteAccession(aKey):
     print "Deleting _accession_key = %s" % aKey

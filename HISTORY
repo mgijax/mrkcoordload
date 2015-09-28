@@ -1,9 +1,14 @@
+TAG: mrkcoordload-6-0-0-5
+DATE: 09/28/2015
+STAFF: lec 
+CHANGES:
+1) bin/createInputFiles.py : add db.commit()
+
 TAG: mrkcoordload-6-0-0-4
 DATE: 8/19/2015
 STAFF: dbm
 CHANGES:
 1) bin/mrkcoordQC.sh: Use .pgpass file in the user's HOME directory if
-                      not run as mgiadmin
 
 TAG: mrkcoordload-6-0-0-1, mrkcoordload-6-0-0-2, mrkcoordload-6-0-0-3
 DATE: 07/24/2015
