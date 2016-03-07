@@ -363,9 +363,6 @@ fi
 #
 # Create temp tables for the input data.
 #
-# we use a text field for mirbaseID because this field can be > 255 and our sybaselib does not allow
-# varchar or char > 255 even though sybase 12.5 does
-#
 
 echo "" >> ${LOG}
 date >> ${LOG}
@@ -373,15 +370,15 @@ echo "Create temp tables for the input data" >> ${LOG}
 cat - <<EOSQL | psql -h${MGD_DBSERVER} -d${MGD_DBNAME} -U mgd_dbo -e  >> ${LOG}
 
 create table ${TEMP_TABLE} (
-    mgiID varchar(80) not null,
-    chromosome varchar(8) null,
+    mgiID text not null,
+    chromosome text null,
     startCoordinate float null,
     endCoordinate float null,
     strand char(1) null,
-    provider varchar(255) not null,
-    display varchar(255) not null,
+    provider text not null,
+    display text not null,
     mirbaseID text null,
-    buildValue varchar(30) not null
+    buildValue text not null
 );
 
 create index idx_mgiID on ${TEMP_TABLE} (mgiID);
