@@ -381,9 +381,9 @@ create table ${TEMP_TABLE} (
     buildValue text not null
 );
 
-create index idx_mgiID on ${TEMP_TABLE} (mgiID);
+create index tmp_idx_mgiID on ${TEMP_TABLE} (mgiID);
 
-create index idx_chromosome on ${TEMP_TABLE} (chromosome);
+create index tmp_idx_chromosome on ${TEMP_TABLE} (chromosome);
 
 grant all on ${TEMP_TABLE} to public;
 

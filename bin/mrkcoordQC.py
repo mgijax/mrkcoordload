@@ -129,6 +129,9 @@ import re
 import mgi_utils
 import db
 
+db.setAutoTranslate(False)
+db.setAutoTranslateBE(False)
+
 #
 #  CONSTANTS
 #
@@ -480,61 +483,59 @@ def createInvMarkerReport ():
     fpInvMrkRpt.write(12*'-' + '  ' +  20*'-' + '  ' + \
                       20*'-' + '  ' + 30*'-' + NL)
 
-    cmds = []
-
     #
     # Find any MGI IDs from the coordinate file that:
     # 1) Do not exist in the database.
     # 2) Exist for a non-marker object. (Exclude annotation evidence)
     # 3) Exist for a marker, but the status is not "offical" or "interim".
     #
-    cmds.append('select tmp.mgiID, ' + \
-                       'null as name, ' + \
-                       'null as status ' + \
-                'from ' + coordTempTable + ' tmp ' + \
-                'where not exists (select 1 ' + \
-                                  'from ACC_Accession a ' + \
-                                  'where a.accID = tmp.mgiID) ' + \
-                'union ' + \
-                'select tmp.mgiID, ' + \
-                       't.name, ' + \
-                       'null as status ' + \
-                'from ' + coordTempTable + ' tmp, ' + \
-                     'ACC_Accession a1, ' + \
-                     'ACC_MGIType t ' + \
-                'where a1.accID = tmp.mgiID and ' + \
-                      'a1._LogicalDB_key = 1 and ' + \
-                      'a1._MGIType_key not in (2, 25) and ' + \
-                      'not exists (select 1 ' + \
-                                  'from ACC_Accession a2 ' + \
-                                  'where a2.accID = tmp.mgiID and ' + \
-                                        'a2._LogicalDB_key = 1 and ' + \
-                                        'a2._MGIType_key = 2) and ' + \
-                      'a1._MGIType_key = t._MGIType_key ' + \
-                'union ' + \
-                'select tmp.mgiID, ' + \
-                       't.name, ' + \
-                       'ms.status ' + \
-                'from ' + coordTempTable + ' tmp, ' + \
-                     'ACC_Accession a, ' + \
-                     'ACC_MGIType t, ' + \
-                     'MRK_Marker m, ' + \
-                     'MRK_Status ms ' + \
-                'where a.accID = tmp.mgiID and ' + \
-                      'a._LogicalDB_key = 1 and ' + \
-                      'a._MGIType_key = 2 and ' + \
-                      'a._MGIType_key = t._MGIType_key and ' + \
-                      'a._Object_key = m._Marker_key and ' + \
-                      'm._Marker_Status_key not in (1,3) and ' + \
-                      'm._Marker_Status_key = ms._Marker_Status_key ' + \
-                'order by mgiID')
-
-    results = db.sql(cmds,'auto')
+    results = db.sql('''
+		(
+                select tmp.mgiID,
+                       null as name,
+                       null as status
+                from %s tmp
+                where not exists (select 1 from ACC_Accession a where a.accID = tmp.mgiID)
+                union
+                select tmp.mgiID,
+                       t.name,
+                       null as status
+                from %s tmp, 
+		     ACC_Accession a1, 
+		     ACC_MGIType t
+                where a1.accID = tmp.mgiID and 
+                      a1._LogicalDB_key = 1 and
+                      a1._MGIType_key not in (2, 25) and 
+                      not exists (select 1 
+                                  from ACC_Accession a2 
+                                  where a2.accID = tmp.mgiID and 
+                                        a2._LogicalDB_key = 1 and 
+                                        a2._MGIType_key = 2) and 
+                      a1._MGIType_key = t._MGIType_key 
+                union 
+                select tmp.mgiID, 
+                       t.name, 
+                       ms.status 
+                from %s tmp, 
+                     ACC_Accession a, 
+                     ACC_MGIType t, 
+                     MRK_Marker m, 
+                     MRK_Status ms 
+                where a.accID = tmp.mgiID and 
+                      a._LogicalDB_key = 1 and 
+                      a._MGIType_key = 2 and 
+                      a._MGIType_key = t._MGIType_key and 
+                      a._Object_key = m._Marker_key and 
+                      m._Marker_Status_key not in (1,3) and 
+                      m._Marker_Status_key = ms._Marker_Status_key 
+		)
+                order by mgiID
+		''' % (coordTempTable, coordTempTable, coordTempTable), 'auto')
 
     #
     # Write the records to the report.
     #
-    for r in results[0]:
+    for r in results:
         mgiID = r['mgiID']
         objectType = r['name']
         markerStatus = r['status']
@@ -564,7 +565,7 @@ def createInvMarkerReport ():
             if not badMGIIDs.has_key(mgiID):
                 badMGIIDs[mgiID] = ''
 
-    numErrors = len(results[0])
+    numErrors = len(results)
     fpInvMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
     errorCount += numErrors
@@ -593,13 +594,11 @@ def createSecMarkerReport ():
     fpSecMrkRpt.write(16*'-' + '  ' + 50*'-' + '  ' + \
                       16*'-' + NL)
 
-    cmds = []
-
     #
     # Find any MGI IDs from the coordinate file that are secondary IDs
     # for a marker.
     #
-    cmds.append('select tmp.mgiID, ' + \
+    results = db.sql('select tmp.mgiID, ' + \
                        'm.symbol, ' + \
                        'a2.accID ' + \
                 'from ' + coordTempTable + ' tmp, ' + \
@@ -615,13 +614,12 @@ def createSecMarkerReport ():
                       'a2._LogicalDB_key = 1 and ' + \
                       'a2.preferred = 1 and ' + \
                       'a2._Object_key = m._Marker_key ' + \
-                'order by mgiID')
+                'order by mgiID', 'auto')
 
-    results = db.sql(cmds,'auto')
     #
     # Write the records to the report.
     #
-    for r in results[0]:
+    for r in results:
         mgiID = r['mgiID']
 
         fpSecMrkRpt.write('%-16s  %-50s  %-16s%s' %
@@ -637,7 +635,7 @@ def createSecMarkerReport ():
             if not badMGIIDs.has_key(mgiID):
                 badMGIIDs[mgiID] = ''
 
-    numErrors = len(results[0])
+    numErrors = len(results)
     fpSecMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
     errorCount += numErrors
@@ -665,8 +663,6 @@ def createInvChrReport ():
                          ('MGI ID', 'Marker Symbol', 'Invalid Chr', NL))
     fpInvChrRpt.write(20*'-' + '  ' + 50*'-' + '  ' +
                           10*'-' + '  ' + NL)
-
-    cmds = []
 
     #
     # Find any cases where the feature chromosome is not a valid
@@ -736,8 +732,6 @@ def createChrDiscrepReport ():
                          ('MGI ID', 'Marker Symbol', 'Marker Chr','Feature Chr',NL))
     fpChrDiscrepRpt.write(20*'-' + '  ' + 50*'-' + '  ' +
                           10*'-' + '  ' + 10*'-' + NL)
-
-    cmds = []
 
     #
     # Find any cases where the marker in the coordinate file has
@@ -855,8 +849,6 @@ def createNonMirnaMarkerReport ():
                      ('MGI ID','Feature Type','miRBase ID',NL))
     fpNonMirnaMrkRpt.write(16*'-' + '  ' + 50*'-' + '  ' + 16*'-' + NL)
 
-    cmds = []
-
     #
     # Find any MGI IDs from the coordinate file that are supposed to be
     # associated with a miRBase ID, but the marker does not have a
@@ -865,25 +857,23 @@ def createNonMirnaMarkerReport ():
     # we use tc.mirbaseID like "%MI%" because mirbaseID is a text field
     #  and only like is allowed for a text field in the where clause 
     #
-    cmds.append('select tc.mgiID, tc.mirbaseID, m.term ' + \
-                'from ' + coordTempTable + ' tc, ' + \
-                     'ACC_Accession a, ' + \
-                     'MRK_MCV_Cache m ' + \
-                'where tc.mirbaseID like "%MI%" and ' + \
-                      'tc.mgiID = a.accID and ' + \
-                      'a._MGIType_key = 2 and ' + \
-                      'a._LogicalDB_key = 1 and ' + \
-                      'a.preferred = 1 and ' + \
-                      'a._Object_key = m._Marker_key and ' + \
-                      'm.qualifier = "D" and ' + \
-                      'm.term != "miRNA gene" ' + \
-                'order by mgiID')
+    sql = 'select tc.mgiID, tc.mirbaseID, m.term from %s tc, ACC_Accession a, MRK_MCV_Cache m ' % (coordTempTable)
+    results = db.sql(sql + \
+    	'''where tc.mirbaseID like '%MI%' and
+          tc.mgiID = a.accID and 
+          a._MGIType_key = 2 and 
+          a._LogicalDB_key = 1 and 
+          a.preferred = 1 and 
+          a._Object_key = m._Marker_key and 
+          m.qualifier = 'D' and 
+          m.term != 'miRNA gene'
+        order by mgiID
+	''', 'auto')
 
-    results = db.sql(cmds,'auto')
     #
     # Write the records to the report.
     #
-    for r in results[0]:
+    for r in results:
         mgiID = r['mgiID']
         mirbaseID = r['mirbaseID']
         featureType = r['term']
@@ -891,7 +881,7 @@ def createNonMirnaMarkerReport ():
         fpNonMirnaMrkRpt.write('%-16s  %-50s  %-16s%s' %
             (mgiID, featureType, mirbaseID, NL))
 
-    numErrors = len(results[0])
+    numErrors = len(results)
     fpNonMirnaMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
     errorCount += numErrors
@@ -952,8 +942,8 @@ def createMirbaseDeleteReport ():
 	if mbID != None:
 	    mgi2mbInDbDict[mgiID].append(mbID)
 	
-    results = db.sql('''select mgiID, mirbaseID
-	from %s''' % coordTempTable, 'auto')
+    results = db.sql('''select mgiID, mirbaseID from %s''' % coordTempTable, 'auto')
+
     #
     # Write the records to the report.
     #
@@ -1162,8 +1152,7 @@ def createSourceDisplayReport():
 
     dbSourceList = []
     newSource = 0
-    results = db.sql('''select distinct name, abbreviation
-	from MAP_Coord_Collection''', 'auto')
+    results = db.sql('''select distinct name, abbreviation from MAP_Coord_Collection''', 'auto')
     for r in results:
 	dbSourceList.append('%s/%s' % (r['name'], r['abbreviation']))
     #print 'dbSourceList: %s' % dbSourceList
@@ -1197,8 +1186,7 @@ def createBuildReport():
 
     fpBuildRpt.write('Build Value Not in Database' + NL)
     fpBuildRpt.write(30*'-' + NL)
-    results = db.sql('''select distinct version
-		from MAP_Coordinate''', 'auto')
+    results = db.sql('''select distinct version from MAP_Coordinate''', 'auto')
     dbBuildList = []
     for r in results:
 	dbBuildList.append(r['version'])

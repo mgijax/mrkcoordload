@@ -59,9 +59,10 @@ import sys
 import os
 import db
 import string
-
-# MGI python libraries
 import mgi_utils
+
+db.setAutoTranslate(False)
+db.setAutoTranslateBE(False)
 
 TAB = '\t'
 CRT = '\n'
