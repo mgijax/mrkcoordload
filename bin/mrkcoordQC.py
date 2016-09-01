@@ -487,7 +487,7 @@ def createInvMarkerReport ():
     # Find any MGI IDs from the coordinate file that:
     # 1) Do not exist in the database.
     # 2) Exist for a non-marker object. (Exclude annotation evidence)
-    # 3) Exist for a marker, but the status is not "offical" or "interim".
+    # 3) Exist for a marker, but the status is withdrawn
     #
     results = db.sql('''
 		(
@@ -526,7 +526,7 @@ def createInvMarkerReport ():
                       a._MGIType_key = 2 and 
                       a._MGIType_key = t._MGIType_key and 
                       a._Object_key = m._Marker_key and 
-                      m._Marker_Status_key not in (1,3) and 
+                      m._Marker_Status_key = 2 and 
                       m._Marker_Status_key = ms._Marker_Status_key 
 		)
                 order by mgiID
