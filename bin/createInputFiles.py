@@ -61,9 +61,6 @@ import db
 import string
 import mgi_utils
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 TAB = '\t'
 CRT = '\n'
 
