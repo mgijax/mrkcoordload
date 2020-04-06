@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 #
 #  mrkcoordQC.py
 ###########################################################################
@@ -209,7 +208,7 @@ def checkArgs ():
     global coordFile
 
     if len(sys.argv) != 2:
-        print USAGE
+        print(USAGE)
         sys.exit(1)
 
     coordFile = sys.argv[1]
@@ -224,8 +223,8 @@ def checkArgs ():
 # Throws: Nothing
 #
 def init ():
-    print 'DB Server:' + db.get_sqlServer()
-    print 'DB Name:  ' + db.get_sqlDatabase()
+    print('DB Server:' + db.get_sqlServer())
+    print('DB Name:  ' + db.get_sqlDatabase())
     sys.stdout.flush()
 
     db.set_sqlUser(user)
@@ -254,7 +253,7 @@ def openFiles ():
     try:
         fpCoord = open(coordFile, 'r')
     except:
-        print 'Cannot open input file: ' + coordFile
+        print('Cannot open input file: ' + coordFile)
         sys.exit(1)
 
     #
@@ -263,7 +262,7 @@ def openFiles ():
     try:
         fpCoordBCP = open(coordBCPFile, 'w')
     except:
-        print 'Cannot open output file: ' + coordBCPFile
+        print('Cannot open output file: ' + coordBCPFile)
         sys.exit(1)
 
     #
@@ -272,62 +271,62 @@ def openFiles ():
     try:
         fpInvMrkRpt = open(invMrkRptFile, 'a')
     except:
-        print 'Cannot open report file: ' + invMrkRptFile
+        print('Cannot open report file: ' + invMrkRptFile)
         sys.exit(1)
     try:
         fpSecMrkRpt = open(secMrkRptFile, 'a')
     except:
-        print 'Cannot open report file: ' + secMrkRptFile
+        print('Cannot open report file: ' + secMrkRptFile)
         sys.exit(1)
     try:
-	fpInvChrRpt = open(invChrRptFile, 'a')
+        fpInvChrRpt = open(invChrRptFile, 'a')
     except:
-        print 'Cannot open report file: ' + invChrRptFile
+        print('Cannot open report file: ' + invChrRptFile)
         sys.exit(1)
     try:
         fpChrDiscrepRpt = open(chrDiscrepRptFile, 'a')
     except:
-        print 'Cannot open report file: ' + chrDiscrepRptFile
+        print('Cannot open report file: ' + chrDiscrepRptFile)
         sys.exit(1)
     try:
         fpInvCoordStrandRpt = open(invCoordStrandRptFile, 'a')
     except:
-        print 'Cannot  open report file: ' + invCoordStrandRptFile
+        print('Cannot  open report file: ' + invCoordStrandRptFile)
         sys.exit(1)
     try:
         fpNonMirnaMrkRpt = open(nonMirnaMrkRptFile, 'a')
     except:
-        print 'Cannot  open report file: ' + nonMirnaMrkRptFile
+        print('Cannot  open report file: ' + nonMirnaMrkRptFile)
         sys.exit(1)
     try:
         fpMirbaseDeleteRpt = open(mirbaseDeleteRptFile, 'a')
     except:
-        print 'Cannot  open report file: ' + mirbaseDeleteRptFile
+        print('Cannot  open report file: ' + mirbaseDeleteRptFile)
         sys.exit(1)
     try:
-	fpDupMirbaseIdRpt = open(dupMirbaseIdRptFile, 'a')
+        fpDupMirbaseIdRpt = open(dupMirbaseIdRptFile, 'a')
     except:
-        print 'Cannot  open report file: ' + dupMirbaseIdRptFile
+        print('Cannot  open report file: ' + dupMirbaseIdRptFile)
         sys.exit(1)
     try:
         fpMirbaseOtherMrkRpt = open(mirbaseOtherMrkRptFile, 'a')
     except:
-        print 'Cannot  open report file: ' + mirbaseOtherMrkRptFile
+        print('Cannot  open report file: ' + mirbaseOtherMrkRptFile)
         sys.exit(1)
     try:
         fpSourceDisplayRpt = open(sourceDisplayRptFile, 'a')
     except:
-        print 'Cannot  open report file: ' + sourceDisplayRptFile
+        print('Cannot  open report file: ' + sourceDisplayRptFile)
         sys.exit(1)
     try:
         fpBuildRpt = open(buildRptFile, 'a')
     except:
-        print 'Cannot  open report file: ' + buildRptFile
+        print('Cannot  open report file: ' + buildRptFile)
         sys.exit(1)
     try:
         fpRptNamesRpt = open(rptNamesFile, 'a')
     except:
-        print 'Cannot open report file: ' + invMrkRptFile
+        print('Cannot open report file: ' + invMrkRptFile)
         sys.exit(1)
     return
 
@@ -371,7 +370,7 @@ def closeFiles ():
 def loadTempTables ():
     global build, mb2mgiInInputDict, header
 
-    print 'Create a bcp file from the coordinate input file'
+    print('Create a bcp file from the coordinate input file')
     sys.stdout.flush()
 
     #
@@ -384,13 +383,13 @@ def loadTempTables ():
 
     tokens = header.split(';')
     for t in tokens:
-	a = t.split('=')
-	if a[0].strip().lower() == 'build':
-	    build = a[1].strip()
+        a = t.split('=')
+        if a[0].strip().lower() == 'build':
+            build = a[1].strip()
     count = 1
     writeInvcoordStrandHeader()
     for line in fpCoord.readlines():
-	#print 'line: %s' % line
+        #print 'line: %s' % line
         tokens = re.split(TAB, line[:-1])
         mgiID = tokens[0].strip()
         chromosome = tokens[1].strip()
@@ -398,21 +397,21 @@ def loadTempTables ():
         endCoordinate = tokens[3].strip()
         strand = tokens[4].strip()
         source = tokens[5].strip()
-	display = tokens[6].strip()
-	miRBaseID = tokens[7].strip()
-	if miRBaseID != '':
-	    for id in string.split(miRBaseID, ','):
-		id = string.strip(id)
-		if not mb2mgiInInputDict.has_key(id):
-		    mb2mgiInInputDict[id] = []
-		mb2mgiInInputDict[id].append(mgiID)
-	sourceDisplay = '%s/%s' % (source, display)
-	#print 'sourceDisplay: %s' % sourceDisplay
-	if not sourceDisplay in sourceDisplayList:
-	    sourceDisplayList.append(sourceDisplay)
+        display = tokens[6].strip()
+        miRBaseID = tokens[7].strip()
+        if miRBaseID != '':
+            for id in str.split(miRBaseID, ','):
+                id = str.strip(id)
+                if id not in mb2mgiInInputDict:
+                    mb2mgiInInputDict[id] = []
+                mb2mgiInInputDict[id].append(mgiID)
+        sourceDisplay = '%s/%s' % (source, display)
+        #print 'sourceDisplay: %s' % sourceDisplay
+        if not sourceDisplay in sourceDisplayList:
+            sourceDisplayList.append(sourceDisplay)
         errors = createInvCoordStrandReport(mgiID, startCoordinate, endCoordinate, strand, source)
-	if errors != 0:
-	    continue
+        if errors != 0:
+            continue
 
         fpCoordBCP.write(mgiID + TAB + chromosome + TAB +
                      startCoordinate + TAB + endCoordinate + TAB +
@@ -429,26 +428,26 @@ def loadTempTables ():
     #
     # Load the temp tables with the input data.
     #
-    print 'Load the coordinate data into the temp table: ' + coordTempTable
+    print('Load the coordinate data into the temp table: ' + coordTempTable)
 
     bcpCmd = '%s %s %s %s "/" %s "\\t" "\\n" mgd' % \
-	(bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(),coordTempTable,
-	coordBCPFile)
+        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(),coordTempTable,
+        coordBCPFile)
 
-    print 'bcp cmd = %s' % bcpCommand
+    print('bcp cmd = %s' % bcpCommand)
     sys.stdout.flush()
 
     rc = os.system(bcpCmd)
-    if rc <> 0:
+    if rc != 0:
         closeFiles()
         sys.exit(1)
 
     return
 
 def writeInvcoordStrandHeader():
-    print 'Create the invalid coordinate and strand report'
-    fpInvCoordStrandRpt.write(string.center('Invalid Coordinate and Strand Report',110) + NL)
-    fpInvCoordStrandRpt.write(string.center('(' + timestamp + ')',110) + 2*NL)
+    print('Create the invalid coordinate and strand report')
+    fpInvCoordStrandRpt.write(str.center('Invalid Coordinate and Strand Report',110) + NL)
+    fpInvCoordStrandRpt.write(str.center('(' + timestamp + ')',110) + 2*NL)
     fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
                      ('MGI ID','Start Coordinate','End Coordinate', 'Strand',
                       'Provider','Reason',NL))
@@ -471,9 +470,9 @@ def writeInvcoordStrandFooter():
 def createInvMarkerReport ():
     global errorCount, errorReportNames, badMGIIDs
 
-    print 'Create the invalid marker report'
-    fpInvMrkRpt.write(string.center('Invalid Marker Report',110) + NL)
-    fpInvMrkRpt.write(string.center('(' + timestamp + ')',110) + 2*NL)
+    print('Create the invalid marker report')
+    fpInvMrkRpt.write(str.center('Invalid Marker Report',110) + NL)
+    fpInvMrkRpt.write(str.center('(' + timestamp + ')',110) + 2*NL)
     fpInvMrkRpt.write('%-12s  %-20s  %-20s  %-30s%s' %
                      ('MGI ID','Associated Object',
                       'Marker Status','Reason',NL))
@@ -487,7 +486,7 @@ def createInvMarkerReport ():
     # 3) Exist for a marker, but the status is not official (withdrawn or reserved)
     #
     results = db.sql('''
-		(
+                (
                 select tmp.mgiID,
                        null as name,
                        null as status
@@ -498,8 +497,8 @@ def createInvMarkerReport ():
                        t.name,
                        null as status
                 from %s tmp, 
-		     ACC_Accession a1, 
-		     ACC_MGIType t
+                     ACC_Accession a1, 
+                     ACC_MGIType t
                 where a1.accID = tmp.mgiID and 
                       a1._LogicalDB_key = 1 and
                       a1._MGIType_key not in (2, 25) and 
@@ -525,9 +524,9 @@ def createInvMarkerReport ():
                       a._Object_key = m._Marker_key and 
                       m._Marker_Status_key != 1 and 
                       m._Marker_Status_key = ms._Marker_Status_key 
-		)
+                )
                 order by mgiID
-		''' % (coordTempTable, coordTempTable, coordTempTable), 'auto')
+                ''' % (coordTempTable, coordTempTable, coordTempTable), 'auto')
 
     #
     # Write the records to the report.
@@ -559,7 +558,7 @@ def createInvMarkerReport ():
         # at the end of this script.
         #
         if liveRun == "1":
-            if not badMGIIDs.has_key(mgiID):
+            if mgiID not in badMGIIDs:
                 badMGIIDs[mgiID] = ''
 
     numErrors = len(results)
@@ -567,8 +566,8 @@ def createInvMarkerReport ():
 
     errorCount += numErrors
     if numErrors > 0:
-	if not invMrkRptFile in errorReportNames:
-	    errorReportNames.append(invMrkRptFile + NL)
+        if not invMrkRptFile in errorReportNames:
+            errorReportNames.append(invMrkRptFile + NL)
     return
 
 
@@ -582,9 +581,9 @@ def createInvMarkerReport ():
 def createSecMarkerReport ():
     global errorCount, errorReportNames, badMGIIDs
 
-    print 'Create the secondary marker report'
-    fpSecMrkRpt.write(string.center('Secondary Marker Report',108) + NL)
-    fpSecMrkRpt.write(string.center('(' + timestamp + ')',108) + 2*NL)
+    print('Create the secondary marker report')
+    fpSecMrkRpt.write(str.center('Secondary Marker Report',108) + NL)
+    fpSecMrkRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
     fpSecMrkRpt.write('%-16s  %-50s  %-16s%s' %
                      ('Secondary MGI ID',
                       'Marker Symbol','Primary MGI ID',NL))
@@ -629,7 +628,7 @@ def createSecMarkerReport ():
         # at the end of this script.
         #
         if liveRun == "1":
-            if not badMGIIDs.has_key(mgiID):
+            if mgiID not in badMGIIDs:
                 badMGIIDs[mgiID] = ''
 
     numErrors = len(results)
@@ -637,8 +636,8 @@ def createSecMarkerReport ():
 
     errorCount += numErrors
     if numErrors > 0:
-	if not secMrkRptFile in errorReportNames:
-	    errorReportNames.append(secMrkRptFile + NL)
+        if not secMrkRptFile in errorReportNames:
+            errorReportNames.append(secMrkRptFile + NL)
     return
 
 
@@ -652,10 +651,10 @@ def createSecMarkerReport ():
 def createInvChrReport ():
     global errorCount, errorReportNames, invChrList, badMGIIDs
 
-    print 'Create the invalid chromosome report'
-    fpInvChrRpt.write(string.center('Invalid Chromosome Report',96) + NL
+    print('Create the invalid chromosome report')
+    fpInvChrRpt.write(str.center('Invalid Chromosome Report',96) + NL
 )
-    fpInvChrRpt.write(string.center('(' + timestamp + ')',96) + 2*NL)
+    fpInvChrRpt.write(str.center('(' + timestamp + ')',96) + 2*NL)
     fpInvChrRpt.write('%-20s  %-50s  %-10s%s' %
                          ('MGI ID', 'Marker Symbol', 'Invalid Chr', NL))
     fpInvChrRpt.write(20*'-' + '  ' + 50*'-' + '  ' +
@@ -678,9 +677,9 @@ def createInvChrReport ():
                 and a.preferred = 1
                 and a._Object_key = m._Marker_key
                 and tc.chromosome not in (select mc.chromosome
-		    from MRK_Chromosome mc
-		    where mc._Organism_key = 1
-		    and mc.chromosome != 'UN')
+                    from MRK_Chromosome mc
+                    where mc._Organism_key = 1
+                    and mc.chromosome != 'UN')
                 order by mgiID''' % coordTempTable, 'auto')
 
     #
@@ -699,7 +698,7 @@ def createInvChrReport ():
         # at the end of this script.
         #
         if liveRun == "1":
-            if not badMGIIDs.has_key(mgiID):
+            if mgiID not in badMGIIDs:
                 badMGIIDs[mgiID] = ''
 
     numErrors = len(results)
@@ -722,9 +721,9 @@ def createInvChrReport ():
 def createChrDiscrepReport ():
     global errorCount, errorReportNames, invChrList
 
-    print 'Create the chromosome discrepancy report'
-    fpChrDiscrepRpt.write(string.center('Chromosome Discrepancy Report',96) + NL)
-    fpChrDiscrepRpt.write(string.center('(' + timestamp + ')',96) + 2*NL)
+    print('Create the chromosome discrepancy report')
+    fpChrDiscrepRpt.write(str.center('Chromosome Discrepancy Report',96) + NL)
+    fpChrDiscrepRpt.write(str.center('(' + timestamp + ')',96) + 2*NL)
     fpChrDiscrepRpt.write('%-20s  %-50s  %-10s  %-10s%s' %
                          ('MGI ID', 'Marker Symbol', 'Marker Chr','Feature Chr',NL))
     fpChrDiscrepRpt.write(20*'-' + '  ' + 50*'-' + '  ' +
@@ -736,7 +735,7 @@ def createChrDiscrepReport ():
     #
     
     # exclude invalid chromosomes
-    ic = string.join(invChrList, ',')
+    ic = str.join(invChrList, ',')
     results = db.sql('''select tc.mgiID, 
                        tc.chromosome as fChr, 
                        m.symbol, 
@@ -745,8 +744,8 @@ def createChrDiscrepReport ():
                      ACC_Accession a, 
                      MRK_Marker m 
                 where tc.chromosome not in (%s)
-		and tc.mgiID = a.accID 
-		and a._MGIType_key = 2 
+                and tc.mgiID = a.accID 
+                and a._MGIType_key = 2 
                 and a._LogicalDB_key = 1 
                 and a.preferred = 1 
                 and a._Object_key = m._Marker_key 
@@ -768,7 +767,7 @@ def createChrDiscrepReport ():
 
     errorCount += numErrors
     if numErrors > 0:
-	if not chrDiscrepRptFile in errorReportNames:
+        if not chrDiscrepRptFile in errorReportNames:
             errorReportNames.append(chrDiscrepRptFile + NL)
     return
 
@@ -785,28 +784,28 @@ def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, s
 
     numErrors = 0    
     if len(re.findall('[^0-9]',startCoordinate)) > 0:
-	numErrors += 1
-	reason = 'Invalid start coordinate'
+        numErrors += 1
+        reason = 'Invalid start coordinate'
         fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
             (mgiID, startCoordinate, endCoordinate, strand, source, reason, NL))
 
     if len(re.findall('[^0-9]',endCoordinate)) > 0:
-	numErrors += 1
-	reason = 'Invalid end coordinate'
-	fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
+        numErrors += 1
+        reason = 'Invalid end coordinate'
+        fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
             (mgiID, startCoordinate, endCoordinate, strand, source, reason, NL))
     # if start and end are valid check that start < end
     if numErrors == 0:
-	if startCoordinate != '' and endCoordinate != '' and (int(startCoordinate) > int(endCoordinate)):
-	    numErrors += 1
-	    reason = 'Start coordinate > end coordinate'
-	    fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
-		(mgiID, startCoordinate, endCoordinate, strand, source, reason, NL))
+        if startCoordinate != '' and endCoordinate != '' and (int(startCoordinate) > int(endCoordinate)):
+            numErrors += 1
+            reason = 'Start coordinate > end coordinate'
+            fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
+                (mgiID, startCoordinate, endCoordinate, strand, source, reason, NL))
 
     if strand != '-' and strand != '+' and strand != '':
-	numErrors += 1
-	reason = 'Invalid strand'
-	fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
+        numErrors += 1
+        reason = 'Invalid strand'
+        fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
             (mgiID, startCoordinate, endCoordinate, strand, source, reason, NL))
 
     if numErrors > 0:
@@ -817,12 +816,12 @@ def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, s
         # at the end of this script.
         #
         if liveRun == "1":
-            if not badMGIIDs.has_key(mgiID):
+            if mgiID not in badMGIIDs:
                 badMGIIDs[mgiID] = ''
 
-	if not invCoordStrandRptFile + '\n' in errorReportNames:
-	    errorReportNames.append(invCoordStrandRptFile + NL)
-	
+        if not invCoordStrandRptFile + '\n' in errorReportNames:
+            errorReportNames.append(invCoordStrandRptFile + NL)
+        
     errorCount += numErrors
     coordErrorCount += numErrors
 
@@ -839,9 +838,9 @@ def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, s
 def createNonMirnaMarkerReport ():
     global errorCount, errorReportNames
 
-    print 'Create the non-miRNA marker report'
-    fpNonMirnaMrkRpt.write(string.center('Non-miRNA Marker Report',108) + NL)
-    fpNonMirnaMrkRpt.write(string.center('(' + timestamp + ')',108) + 2*NL)
+    print('Create the non-miRNA marker report')
+    fpNonMirnaMrkRpt.write(str.center('Non-miRNA Marker Report',108) + NL)
+    fpNonMirnaMrkRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
     fpNonMirnaMrkRpt.write('%-16s  %-50s  %-16s%s' %
                      ('MGI ID','Feature Type','miRBase ID',NL))
     fpNonMirnaMrkRpt.write(16*'-' + '  ' + 50*'-' + '  ' + 16*'-' + NL)
@@ -856,7 +855,7 @@ def createNonMirnaMarkerReport ():
     #
     sql = 'select tc.mgiID, tc.mirbaseID, m.term from %s tc, ACC_Accession a, MRK_MCV_Cache m ' % (coordTempTable)
     results = db.sql(sql + \
-    	'''where tc.mirbaseID like '%MI%' and
+        '''where tc.mirbaseID like '%MI%' and
           tc.mgiID = a.accID and 
           a._MGIType_key = 2 and 
           a._LogicalDB_key = 1 and 
@@ -865,7 +864,7 @@ def createNonMirnaMarkerReport ():
           m.qualifier = 'D' and 
           m.term != 'miRNA gene'
         order by mgiID
-	''', 'auto')
+        ''', 'auto')
 
     #
     # Write the records to the report.
@@ -883,8 +882,8 @@ def createNonMirnaMarkerReport ():
 
     errorCount += numErrors
     if numErrors > 0:
-	if not nonMirnaMrkRptFile in errorReportNames:
-	    errorReportNames.append(nonMirnaMrkRptFile + NL)
+        if not nonMirnaMrkRptFile in errorReportNames:
+            errorReportNames.append(nonMirnaMrkRptFile + NL)
     return
 
 #
@@ -897,9 +896,9 @@ def createNonMirnaMarkerReport ():
 def createMirbaseDeleteReport ():
     global errorCount, errorReportNames, mgi2mbInDbDict
 
-    print 'Create the miRBase delete report'
-    fpMirbaseDeleteRpt.write(string.center('miRBase/Marker Deletion Report',108) + NL)
-    fpMirbaseDeleteRpt.write(string.center('(' + timestamp + ')',108) + 2*NL)
+    print('Create the miRBase delete report')
+    fpMirbaseDeleteRpt.write(str.center('miRBase/Marker Deletion Report',108) + NL)
+    fpMirbaseDeleteRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
     fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' %
                      ('Input MGI ID','Input Symbol','miRBase/Marker Associations To Be Added', 'miRBase/Marker Associations To Be Deleted',NL))
     fpMirbaseDeleteRpt.write(16*'-' + '  ' + 16*'-' + '  ' + 60*'-' + '  ' + 60*'-' + NL)
@@ -911,34 +910,34 @@ def createMirbaseDeleteReport ():
     #
     db.useOneConnection(1)
     db.sql('''select a.accid as mgiID, m._Marker_key, m.symbol
-	into temp mkrs
-	from ACC_Accession a, MRK_Marker m
-	where m._Organism_key = 1
-	and m._Marker_Status_key = 1
-	and m._Marker_key = a._Object_key
-	and a._MGIType_key = 2
-	and a._LogicalDB_key = 1
-	and a.prefixPart = 'MGI:' ''', None)
+        into temp mkrs
+        from ACC_Accession a, MRK_Marker m
+        where m._Organism_key = 1
+        and m._Marker_Status_key = 1
+        and m._Marker_key = a._Object_key
+        and a._MGIType_key = 2
+        and a._LogicalDB_key = 1
+        and a.prefixPart = 'MGI:' ''', None)
 
     db.sql('create index idx1 on mkrs(_Marker_key)', None)
 
     results = db.sql('''select m.*, a.accid as mbID
-	from mkrs m 
-	left outer join
-	ACC_Accession a on
-		m._marker_key=a._object_key
-	where a._MGIType_key = 2
-	and a._LogicalDB_key = 83''', 'auto')
+        from mkrs m 
+        left outer join
+        ACC_Accession a on
+                m._marker_key=a._object_key
+        where a._MGIType_key = 2
+        and a._LogicalDB_key = 83''', 'auto')
 
     for r in results:
-	mgiID = r['mgiID']
-	symbol = r['symbol']
-	mbID = r['mbID']
-	if not mgi2mbInDbDict.has_key(mgiID):
-	     mgi2mbInDbDict[mgiID] = [symbol]
-	if mbID != None:
-	    mgi2mbInDbDict[mgiID].append(mbID)
-	
+        mgiID = r['mgiID']
+        symbol = r['symbol']
+        mbID = r['mbID']
+        if mgiID not in mgi2mbInDbDict:
+             mgi2mbInDbDict[mgiID] = [symbol]
+        if mbID != None:
+            mgi2mbInDbDict[mgiID].append(mbID)
+        
     results = db.sql('''select mgiID, mirbaseID from %s''' % coordTempTable, 'auto')
 
     #
@@ -948,42 +947,42 @@ def createMirbaseDeleteReport ():
     for r in results:
         inputMgiID = r['mgiID']
 
-	#
-	# Get list of input mirbase IDs for this marker
-	# comma delimited string in the input, create list, iterate
-	# over IDs and remove any leading/trailing whitespace
-	#
-	mbID = r['mirbaseID']
-	if mbID == None:
-	    mbID = ''
-        tempList = string.split(mbID, ',')
-	inputMbID = []
-	for id in tempList:
-	    inputMbID.append(string.strip(id))
-	#
-	# Get list of database mirbase IDs for this marker
-	#
-	dbInfo = []
-	if mgi2mbInDbDict.has_key(inputMgiID):
-	    dbInfo = mgi2mbInDbDict[inputMgiID]
-	else:
-	    #print '%s not in database' % inputMgiID
-	    continue
-	symbol = dbInfo[0]
-	dbMbID = []
-	if len(dbInfo) > 1:
-	    dbMbID = dbInfo[1:]
-	#
-	# the deleted mirbase ids are those in the database that are
-	# not in the input
-	#
-	deletedMbID = set(dbMbID).difference(set(inputMbID))
-	addedMbID = set(inputMbID).difference(set(dbMbID))
-	#print 'deletedMbID: %s' % deletedMbID
-	#print 'addedMbID: %s' % addedMbID
-	if deletedMbID:
-	    numErrors += 1
-	    fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' % (inputMgiID, symbol, string.join(addedMbID, ', '), string.join(deletedMbID, ', '), NL))
+        #
+        # Get list of input mirbase IDs for this marker
+        # comma delimited str.in the input, create list, iterate
+        # over IDs and remove any leading/trailing whitespace
+        #
+        mbID = r['mirbaseID']
+        if mbID == None:
+            mbID = ''
+        tempList = str.split(mbID, ',')
+        inputMbID = []
+        for id in tempList:
+            inputMbID.append(str.strip(id))
+        #
+        # Get list of database mirbase IDs for this marker
+        #
+        dbInfo = []
+        if inputMgiID in mgi2mbInDbDict:
+            dbInfo = mgi2mbInDbDict[inputMgiID]
+        else:
+            #print '%s not in database' % inputMgiID
+            continue
+        symbol = dbInfo[0]
+        dbMbID = []
+        if len(dbInfo) > 1:
+            dbMbID = dbInfo[1:]
+        #
+        # the deleted mirbase ids are those in the database that are
+        # not in the input
+        #
+        deletedMbID = set(dbMbID).difference(set(inputMbID))
+        addedMbID = set(inputMbID).difference(set(dbMbID))
+        #print 'deletedMbID: %s' % deletedMbID
+        #print 'addedMbID: %s' % addedMbID
+        if deletedMbID:
+            numErrors += 1
+            fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' % (inputMgiID, symbol, str.join(addedMbID, ', '), str.join(deletedMbID, ', '), NL))
 
     db.sql('drop table mkrs', None)
     db.useOneConnection(0)
@@ -991,8 +990,8 @@ def createMirbaseDeleteReport ():
 
     errorCount += numErrors
     if numErrors > 0:
-	if not mirbaseDeleteRptFile in errorReportNames:
-	    errorReportNames.append(mirbaseDeleteRptFile + NL)
+        if not mirbaseDeleteRptFile in errorReportNames:
+            errorReportNames.append(mirbaseDeleteRptFile + NL)
     return
 
 #
@@ -1005,20 +1004,20 @@ def createMirbaseDeleteReport ():
 def createDupMirbaseIdReport():
     global errorCount, errorReportNames
 
-    print 'Create the duplicate miRBase ID report'
-    fpDupMirbaseIdRpt.write(string.center('Duplicate miRBase ID Report',108) + NL)
-    fpDupMirbaseIdRpt.write(string.center('(' + timestamp + ')',108) + 2*NL)
+    print('Create the duplicate miRBase ID report')
+    fpDupMirbaseIdRpt.write(str.center('Duplicate miRBase ID Report',108) + NL)
+    fpDupMirbaseIdRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
     fpDupMirbaseIdRpt.write('%-16s  %-40s%s' %
                      ('Input miRBase ID', 'Associated MGI IDs', NL))
     fpDupMirbaseIdRpt.write(16*'-' + '  ' + 50*'-' + NL)
 
     numErrors = 0
-    for mbId in mb2mgiInInputDict.keys():
-	mgiIdList = mb2mgiInInputDict[mbId]
-	if len(mgiIdList) > 1:
-	    fpDupMirbaseIdRpt.write('%-16s  %-50s%s' % 
-		(mbId, string.join(mgiIdList, ','), NL ) )
-	    numErrors += 1
+    for mbId in list(mb2mgiInInputDict.keys()):
+        mgiIdList = mb2mgiInInputDict[mbId]
+        if len(mgiIdList) > 1:
+            fpDupMirbaseIdRpt.write('%-16s  %-50s%s' % 
+                (mbId, str.join(mgiIdList, ','), NL ) )
+            numErrors += 1
     fpDupMirbaseIdRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
     errorCount += numErrors
@@ -1038,14 +1037,14 @@ def createDupMirbaseIdReport():
 def createMirbaseOtherMrkReport():
     global errorCount, errorReportNames
 
-    print 'Create the miRBase ID associated with other marker report'
+    print('Create the miRBase ID associated with other marker report')
     db.useOneConnection(1)
     db.sql('''select a.accid as mgiID, mm._Marker_key
         into temp mkrs
         from ACC_Accession a, MRK_Marker mm, MRK_Location_Cache m
         where mm._Organism_key = 1
         and mm._Marker_key =  m._Marker_key
-	and m._Marker_key = a._Object_key
+        and m._Marker_key = a._Object_key
         and a._MGIType_key = 2
         and a._LogicalDB_key = 1
         and a.prefixPart = 'MGI:' ''', None)
@@ -1054,77 +1053,77 @@ def createMirbaseOtherMrkReport():
 
     results = db.sql('''select m.*, a.accid as mbID
         from mkrs m 
-	left outer join
-	 ACC_Accession a on
-		m._marker_key=a._object_key
+        left outer join
+         ACC_Accession a on
+                m._marker_key=a._object_key
         where a._MGIType_key = 2
         and a._LogicalDB_key = 83''', 'auto')
 
     for r in results:
-	mbID = r['mbID']
-	mgiID = r['mgiID']
-	if not mb2mgiInDbDict.has_key(mbID):
-	    mb2mgiInDbDict[mbID] = []
-	mb2mgiInDbDict[mbID].append(mgiID)
+        mbID = r['mbID']
+        mgiID = r['mgiID']
+        if mbID not in mb2mgiInDbDict:
+            mb2mgiInDbDict[mbID] = []
+        mb2mgiInDbDict[mbID].append(mgiID)
 
-    print 'Create the miRBase IDs associated with other markers report'
+    print('Create the miRBase IDs associated with other markers report')
     db.sql('drop table mkrs', None)
     db.useOneConnection(0)
 
-    fpMirbaseOtherMrkRpt.write(string.center('miRBase IDs in the Input Associated with Different Markers in MGI Report',108) + NL)
-    fpMirbaseOtherMrkRpt.write(string.center('(' + timestamp + ')',108) + 2*NL)
+    fpMirbaseOtherMrkRpt.write(str.center('miRBase IDs in the Input Associated with Different Markers in MGI Report',108) + NL)
+    fpMirbaseOtherMrkRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
     fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' %
                      ('Input miRBase ID','Input MGI IDs', 'Database MGI IDs',NL))
     fpMirbaseOtherMrkRpt.write(16*'-' + '  ' + 40*'-' + '  ' + 40*'-' + NL)
  
     numErrors = 0
-    for mbID in mb2mgiInInputDict.keys():
-	#
-	#  get input mgiIDs associated with mbID
-	# 
+    for mbID in list(mb2mgiInInputDict.keys()):
+        #
+        #  get input mgiIDs associated with mbID
+        # 
 
         mgiIdInInputList = mb2mgiInInputDict[mbID]
 
-	#
-	# get db mgiIDs associated with mbID
-	#
+        #
+        # get db mgiIDs associated with mbID
+        #
 
-	if mb2mgiInDbDict.has_key(mbID):
-	    mgiIdInDbList = mb2mgiInDbDict[mbID]
-	else:
-	    #print '%s not associate with marker in the database' % mbID
-	    continue
+        if mbID in mb2mgiInDbDict:
+            mgiIdInDbList = mb2mgiInDbDict[mbID]
+        else:
+            #print '%s not associate with marker in the database' % mbID
+            continue
 
-	#
-	# diff the sets - we're looking for any mgiIDs in the db not in the
-	# input for  mbID
-	#
+        #
+        # diff the sets - we're looking for any mgiIDs in the db not in the
+        # input for  mbID
+        #
 
-	diffSet = set(mgiIdInDbList).difference(set(mgiIdInInputList))
+        diffSet = set(mgiIdInDbList).difference(set(mgiIdInInputList))
 
-	# DEBUG
-	#print 'mbID: %s' % mbID
-	#print 'mgiIdInDbList: %s' % mgiIdInDbList
-	#print 'mgiIdInInputList: %s' % mgiIdInInputList
-	#print 'diffSet: %s' % diffSet
+        # DEBUG
+        #print 'mbID: %s' % mbID
+        #print 'mgiIdInDbList: %s' % mgiIdInDbList
+        #print 'mgiIdInInputList: %s' % mgiIdInInputList
+        #print 'diffSet: %s' % diffSet
 
-	# report mgiIDs for mbID in the db that are not in the input
-	if diffSet:
-	    numErrors += 1
-	    #
-	    # get input info
-	    #
-	    inputData = []
-	    dbData = []
-	    for id in mgiIdInInputList:
-		inputData.append(id)
-	    #
-	    # get db info
-	    #
-	    for id in diffSet:
-		dbData.append(id)
-	    
-	    fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' % (mbID, string.join(inputData, ', '), string.join(dbData, ', '), NL))
+        # report mgiIDs for mbID in the db that are not in the input
+        if diffSet:
+            numErrors += 1
+            #
+            # get input info
+            #
+            inputData = []
+            dbData = []
+            for id in mgiIdInInputList:
+                inputData.append(id)
+            #
+            # get db info
+            #
+            for id in diffSet:
+                dbData.append(id)
+            
+            fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' % (mbID, str.join(inputData, ', '), str.join(dbData, ', '), NL))
 
     errorCount += numErrors
     fpMirbaseOtherMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
@@ -1143,26 +1142,26 @@ def createMirbaseOtherMrkReport():
 def createSourceDisplayReport():
     global errorCount
 
-    print 'Create the source display report'
-    fpSourceDisplayRpt.write(string.center('Source/Display in Input, not in Database',110) + NL)
-    fpSourceDisplayRpt.write(string.center('(' + timestamp + ')',110) + 2*NL)
+    print('Create the source display report')
+    fpSourceDisplayRpt.write(str.center('Source/Display in Input, not in Database',110) + NL)
+    fpSourceDisplayRpt.write(str.center('(' + timestamp + ')',110) + 2*NL)
 
     dbSourceList = []
     newSource = 0
     results = db.sql('''select distinct name, abbreviation from MAP_Coord_Collection''', 'auto')
     for r in results:
-	dbSourceList.append('%s/%s' % (r['name'], r['abbreviation']))
+        dbSourceList.append('%s/%s' % (r['name'], r['abbreviation']))
     #print 'dbSourceList: %s' % dbSourceList
     #print 'sourceDisplayList: %s' % sourceDisplayList
     for s in sourceDisplayList:
-	if s not in dbSourceList:
-	    fpSourceDisplayRpt.write('%s%s' % (s, NL))
-	    newSource += 1
+        if s not in dbSourceList:
+            fpSourceDisplayRpt.write('%s%s' % (s, NL))
+            newSource += 1
     if newSource != 0:
-	errorReportNames.append(sourceDisplayRptFile + NL)
-	errorCount += 1
+        errorReportNames.append(sourceDisplayRptFile + NL)
+        errorCount += 1
     else:
-	fpSourceDisplayRpt.write('No new source/display in input' + NL)
+        fpSourceDisplayRpt.write('No new source/display in input' + NL)
     return
 
 
@@ -1177,20 +1176,20 @@ def createSourceDisplayReport():
 def createBuildReport():
     global errorCount
 
-    print 'Create the build report'
-    fpBuildRpt.write(string.center('Build Report',110) + NL)
-    fpBuildRpt.write(string.center('(' + timestamp + ')',110) + 2*NL)
+    print('Create the build report')
+    fpBuildRpt.write(str.center('Build Report',110) + NL)
+    fpBuildRpt.write(str.center('(' + timestamp + ')',110) + 2*NL)
 
     fpBuildRpt.write('Build Value Not in Database' + NL)
     fpBuildRpt.write(30*'-' + NL)
     results = db.sql('''select distinct version from MAP_Coordinate''', 'auto')
     dbBuildList = []
     for r in results:
-	dbBuildList.append(r['version'])
+        dbBuildList.append(r['version'])
     if build not in dbBuildList:
-	fpBuildRpt.write(build + NL)
-	errorReportNames.append(buildRptFile + NL)
-	errorCount += 1
+        fpBuildRpt.write(build + NL)
+        errorReportNames.append(buildRptFile + NL)
+        errorCount += 1
     return
 
 
@@ -1207,13 +1206,13 @@ def createCoordLoadFile ():
     try:
         fpCoord = open(coordFile, 'r')
     except:
-        print 'Cannot open input file: ' + coordFile
+        print('Cannot open input file: ' + coordFile)
         sys.exit(1)
 
     try:
         fpLoadFile = open(coordLoadFile, 'w')
     except:
-        print 'Cannot open output file: ' + coordLoadFile
+        print('Cannot open output file: ' + coordLoadFile)
         sys.exit(1)
     
     # remove header line - use global header with tabs removed
@@ -1227,7 +1226,7 @@ def createCoordLoadFile ():
         # Only write the input record to the load file if the MGI ID was
         # not added to the dictionary of rejected MGI IDs.
         #
-        if not badMGIIDs.has_key(mgiID):
+        if mgiID not in badMGIIDs:
             fpLoadFile.write(line)
 
     fpCoord.close()
@@ -1260,7 +1259,7 @@ if liveRun == "1":
 #fpRptNamesRpt.write(sourceDisplayRptFile + NL)
 
 if errorCount > 0:
-    names = string.join(errorReportNames,'' )
+    names = str.join(errorReportNames,'' )
     fpRptNamesRpt.write(names)
     fpRptNamesRpt.close()
     sys.exit(2)

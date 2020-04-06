@@ -163,7 +163,7 @@ IFS=$save
 # create input files
 #
 echo 'Running createInputFiles.py' >> ${LOG_DIAG}
-${MRKCOORDLOAD}/bin/createInputFiles.py
+${PYTHON} ${MRKCOORDLOAD}/bin/createInputFiles.py
 STAT=$?
 checkStatus ${STAT} "${MRKCOORDLOAD}/bin/createInputFiles.py"
 

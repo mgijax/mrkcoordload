@@ -273,7 +273,7 @@ checkColumns ()
     echo "" >> ${REPORT}
     echo "Lines With Missing Columns or Data" >> ${REPORT}
     echo "-----------------------------------" >> ${REPORT}
-    ${MRKCOORDLOAD}/bin/checkColumns.py ${FILE} ${NUM_COLUMNS} > ${TMP_FILE}
+    ${PYHON} ${MRKCOORDLOAD}/bin/checkColumns.py ${FILE} ${NUM_COLUMNS} > ${TMP_FILE}
     cat ${TMP_FILE} >> ${REPORT} 
     if [ `cat ${TMP_FILE} | wc -l` -eq 0 ]
     then
@@ -397,7 +397,7 @@ date >> ${LOG}
 echo "Generate the QC reports" >> ${LOG}
 # TO DO uncomment this when we test the python script
 echo "load_qc = $LOAD_QC"
-{ ${LOAD_QC} ${INPUT_FILE_QC} 2>&1; echo $? > ${TMP_FILE}; } >> ${LOG}
+{ ${PYTHON} ${LOAD_QC} ${INPUT_FILE_QC} 2>&1; echo $? > ${TMP_FILE}; } >> ${LOG}
 #echo 0 < ${TMP_FILE}
 if [ `cat ${TMP_FILE}` -eq 1 ]
 then
