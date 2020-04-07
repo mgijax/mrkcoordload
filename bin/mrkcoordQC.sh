@@ -273,7 +273,7 @@ checkColumns ()
     echo "" >> ${REPORT}
     echo "Lines With Missing Columns or Data" >> ${REPORT}
     echo "-----------------------------------" >> ${REPORT}
-    ${PYHON} ${MRKCOORDLOAD}/bin/checkColumns.py ${FILE} ${NUM_COLUMNS} > ${TMP_FILE}
+    ${PYTHON} ${MRKCOORDLOAD}/bin/checkColumns.py ${FILE} ${NUM_COLUMNS} > ${TMP_FILE}
     cat ${TMP_FILE} >> ${REPORT} 
     if [ `cat ${TMP_FILE} | wc -l` -eq 0 ]
     then

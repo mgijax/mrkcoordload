@@ -434,7 +434,7 @@ def loadTempTables ():
         (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(),coordTempTable,
         coordBCPFile)
 
-    print('bcp cmd = %s' % bcpCommand)
+    print('bcp cmd = %s' % bcpCmd)
     sys.stdout.flush()
 
     rc = os.system(bcpCmd)
@@ -735,7 +735,8 @@ def createChrDiscrepReport ():
     #
     
     # exclude invalid chromosomes
-    ic = str.join(invChrList, ',')
+    ic =  ','.join(invChrList)
+    
     results = db.sql('''select tc.mgiID, 
                        tc.chromosome as fChr, 
                        m.symbol, 
@@ -982,7 +983,7 @@ def createMirbaseDeleteReport ():
         #print 'addedMbID: %s' % addedMbID
         if deletedMbID:
             numErrors += 1
-            fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' % (inputMgiID, symbol, str.join(addedMbID, ', '), str.join(deletedMbID, ', '), NL))
+            fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' % (inputMgiID, symbol, ', '.join(addedMbID), ', '.join(deletedMbID), NL))
 
     db.sql('drop table mkrs', None)
     db.useOneConnection(0)
@@ -1016,7 +1017,7 @@ def createDupMirbaseIdReport():
         mgiIdList = mb2mgiInInputDict[mbId]
         if len(mgiIdList) > 1:
             fpDupMirbaseIdRpt.write('%-16s  %-50s%s' % 
-                (mbId, str.join(mgiIdList, ','), NL ) )
+                (mbId, ','.join(mgiIdList), NL ) )
             numErrors += 1
     fpDupMirbaseIdRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -1123,7 +1124,7 @@ def createMirbaseOtherMrkReport():
             for id in diffSet:
                 dbData.append(id)
             
-            fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' % (mbID, str.join(inputData, ', '), str.join(dbData, ', '), NL))
+            fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' % (mbID, ', '.join(inputData), ', '.join(dbData), NL))
 
     errorCount += numErrors
     fpMirbaseOtherMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
@@ -1259,7 +1260,7 @@ if liveRun == "1":
 #fpRptNamesRpt.write(sourceDisplayRptFile + NL)
 
 if errorCount > 0:
-    names = str.join(errorReportNames,'' )
+    names = ''.join(errorReportNames )
     fpRptNamesRpt.write(names)
     fpRptNamesRpt.close()
     sys.exit(2)
