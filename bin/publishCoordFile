@@ -24,8 +24,8 @@ CURRENT_DIR=`pwd`
 # pick up the coordinate load product's location from the environment, if
 # available
 if [ "${COORDLOADDIR}" = "" ]; then
-	#COORDLOADDIR=/usr/local/mgi/live/dataload/mrkcoordload
-        COORDLOADDIR=/home/sc/work/dataload/mrkcoordload
+	COORDLOADDIR=/usr/local/mgi/live/dataload/mrkcoordload
+        #COORDLOADDIR=/home/sc/work/dataload/mrkcoordload
 fi
 
 #
