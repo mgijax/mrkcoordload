@@ -202,8 +202,8 @@ JOBSTREAM=mrk_coordload
 
 export JOBSTREAM
 
-# add or delete_reload
-COORD_LOAD_MODE=reload_by_object
+# add or delete_reload or reload_by_object
+COORD_LOAD_MODE=delete_reload
 
 export COORD_LOAD_MODE
 
