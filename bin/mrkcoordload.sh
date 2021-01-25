@@ -132,6 +132,12 @@ then
     shutDown
     exit 1
 fi
+if [ ${STAT} -eq 3 ]
+then
+    echo "Invalid MiRBase ID: see ${MIRBASE_INVALID_ID_RPT}" 
+    shutDown
+    exit 1
+fi
 
 # get the coordinate version
 save=$IFS
@@ -162,10 +168,14 @@ IFS=$save
 #
 # create input files
 #
+echo "`date`" >> ${LOG_DIAG}
 echo 'Running createInputFiles.py' >> ${LOG_DIAG}
 ${PYTHON} ${MRKCOORDLOAD}/bin/createInputFiles.py
 STAT=$?
 checkStatus ${STAT} "${MRKCOORDLOAD}/bin/createInputFiles.py"
+
+echo "`date`" >> ${LOG_DIAG}
+echo 'Done Running createInputFiles.py' >> ${LOG_DIAG}
 
 #
 # for each input file:
