@@ -28,6 +28,7 @@
 #	   MIRBASE_DELETE_RPT
 #          MIRBASE_DUP_RPT
 #	   MIRBASE_OTHER_MKR_RPT
+#          MIRBASE_INVALID_ID_RPT
 #	   SOURCE_DISPLAY_RPT
 #	   BUILD_RPT
 #	   RPT_NAMES_RPT
@@ -72,6 +73,8 @@
 #      - QC report (${MIRBASE_DUP_RPT})
 #
 #      - QC report (${MIRBASE_OTHER_MKR_RPT})
+#
+#      - QC report (${ MIRBASE_INVALID_ID_RPT})
 #
 #      - QC report (${SOURCE_DISPLAY_RPT})
 #
@@ -160,6 +163,7 @@ nonMirnaMrkRptFile =  os.environ['NON_MIRNA_MARKER_RPT']
 mirbaseDeleteRptFile =  os.environ['MIRBASE_DELETE_RPT']
 dupMirbaseIdRptFile =  os.environ['MIRBASE_DUP_RPT']
 mirbaseOtherMrkRptFile = os.environ['MIRBASE_OTHER_MKR_RPT']
+mirbaseInvalidIdRptFile = os.environ['MIRBASE_INVALID_ID_RPT']
 sourceDisplayRptFile = os.environ['SOURCE_DISPLAY_RPT']
 buildRptFile = os.environ['BUILD_RPT']
 
@@ -179,6 +183,7 @@ invChrList = ["' '"]
 timestamp = mgi_utils.date()
 
 errorCount = 0
+fatalErrorCount = 0
 coordErrorCount = 0
 errorReportNames = []
 
@@ -245,7 +250,7 @@ def openFiles ():
     global fpInvMrkRpt, fpSecMrkRpt, fpInvChrRpt, fpChrDiscrepRpt
     global fpInvCoordStrandRpt, fpNonMirnaMrkRpt, fpMirbaseDeleteRpt
     global fpDupMirbaseIdRpt, fpMirbaseOtherMrkRpt, fpSourceDisplayRpt
-    global fpBuildRpt, fpRptNamesRpt
+    global fpBuildRpt, fpRptNamesRpt, fpMirbaseInvalidIdRpt
 
     #
     # Open the input files.
@@ -314,6 +319,11 @@ def openFiles ():
         print('Cannot  open report file: ' + mirbaseOtherMrkRptFile)
         sys.exit(1)
     try:
+        fpMirbaseInvalidIdRpt = open(mirbaseInvalidIdRptFile, 'w')
+    except:
+        print('Cannot  open report file: ' + mirbaseInvalidIdRptFile)
+        sys.exit(1)
+    try:
         fpSourceDisplayRpt = open(sourceDisplayRptFile, 'a')
     except:
         print('Cannot  open report file: ' + sourceDisplayRptFile)
@@ -352,6 +362,7 @@ def closeFiles ():
     fpMirbaseDeleteRpt.close()
     fpDupMirbaseIdRpt.close()
     fpMirbaseOtherMrkRpt.close()
+    fpMirbaseInvalidIdRpt.close()
     fpSourceDisplayRpt.close()
     fpBuildRpt.close()
     return
@@ -368,7 +379,7 @@ def closeFiles ():
 #
 
 def loadTempTables ():
-    global build, mb2mgiInInputDict, header
+    global build, mb2mgiInInputDict, header, fpMirbaseInvalidIdRpt, fatalErrorCount
 
     print('Create a bcp file from the coordinate input file')
     sys.stdout.flush()
@@ -389,7 +400,6 @@ def loadTempTables ():
     count = 1
     writeInvcoordStrandHeader()
     for line in fpCoord.readlines():
-        #print 'line: %s' % line
         tokens = re.split(TAB, line[:-1])
         mgiID = tokens[0].strip()
         chromosome = tokens[1].strip()
@@ -399,12 +409,20 @@ def loadTempTables ():
         source = tokens[5].strip()
         display = tokens[6].strip()
         miRBaseID = tokens[7].strip()
+
+        badIdList = []
         if miRBaseID != '':
             for id in str.split(miRBaseID, ','):
                 id = str.strip(id)
-                if id not in mb2mgiInInputDict:
-                    mb2mgiInInputDict[id] = []
-                mb2mgiInInputDict[id].append(mgiID)
+                if str.find('MI', str.strip(id)) == -1:
+                    badIdList.append(id)
+            if badIdList:
+                # report, go to next line
+                print('bad MiRBase Ids: %s' % ', '.join(badIdList))
+                fpMirbaseInvalidIdRpt.write('%s%s%s%s' % (mgiID, TAB, ', '.join(badIdList,), NL))
+
+                fatalErrorCount += 1
+                continue
         sourceDisplay = '%s/%s' % (source, display)
         #print 'sourceDisplay: %s' % sourceDisplay
         if not sourceDisplay in sourceDisplayList:
@@ -1203,7 +1221,7 @@ def createBuildReport():
 # Throws: Nothing
 #
 def createCoordLoadFile ():
-
+    global fatalErrorCount
     try:
         fpCoord = open(coordFile, 'r')
     except:
@@ -1258,7 +1276,10 @@ if liveRun == "1":
 
 # always display the source/display report name
 #fpRptNamesRpt.write(sourceDisplayRptFile + NL)
-
+print('fatalErrorCount: %s' % fatalErrorCount)
+if fatalErrorCount > 0:
+   print('Invalid MiRBase ID see %s' % mirbaseInvalidIdRptFile)
+   sys.exit(3)
 if errorCount > 0:
     names = ''.join(errorReportNames )
     fpRptNamesRpt.write(names)
