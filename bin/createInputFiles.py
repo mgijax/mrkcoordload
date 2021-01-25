@@ -83,10 +83,14 @@ inputDict = {}
 # the set of collections found in 'inputFile'
 collectionList = []
 
+# lookup of mouse markers with mirbase ids
+# {mgiID: [list of accession keys], ...}
+mirbaseDict = {}
+
 # (MGI ID:_Marker_key
 # US 35 - initialize lookup of markers with mirbase IDs
 def init():
-    global fpMirbaseAssoc
+    global fpMirbaseAssoc, mirbaseDict
 
     fpMirbaseAssoc = open(mirbaseAssocFile, 'w')
 
@@ -96,6 +100,26 @@ def init():
     passwordFileName = os.environ['MGD_DBPASSWORDFILE']
     db.set_sqlUser(user)
     db.set_sqlPasswordFromFile(passwordFileName)
+
+    results = db.sql('''select a1._Accession_key as aKey, a2.accid as mgiID
+    from ACC_Accession a1, ACC_Accession a2
+    where a1._MGIType_key = 2
+    and a1._LogicalDB_key = 83
+    and a1._object_key = a2._object_key
+    and a2._MGIType_key = 2
+    and a2._LogicalDB_key = 1
+    and a2. preferred = 1
+    and a2.prefixPart = 'MGI:'
+    order by a2.accid
+        ''', 'auto')
+
+    for r in results:
+        mgiID = r['mgiID']
+        accessionKey = r['aKey']
+        if mgiID not in mirbaseDict:
+            mirbaseDict[mgiID] = []
+        mirbaseDict[mgiID].append(accessionKey)
+    return
 
 # US 35 - create assocload file for mirbase id/marker associations
 #	  delete all marker associations to mbID
@@ -107,22 +131,11 @@ def processMirbase(mgiID, mbIDs):
     # If mbIDs = '', could be a miRNA marker that we want to delete miRBase
     #    ids from
     #
-    db.sql('''select a1._Accession_key as aKey, a1._Object_key as _Marker_key, a1.accid as mbID
-        into temp mirbase
-        from ACC_Accession a1
-        where a1._MGIType_key = 2
-        and a1._LogicalDB_key = 83''', None)
-    db.sql('create index idx1 on mirbase(_Marker_key)', None)
-    results = db.sql('''select m.aKey, m.mbID
-        from mirbase m, ACC_Accession a
-        where m._Marker_key = a._Object_key
-        and a._MGIType_key = 2
-        and a._LogicalDB_key = 1
-        and a.accid = '%s' ''' % mgiID, 'auto')
 
-    db.sql('drop table mirbase', None)
-    for r in results:
-        deleteAccession(r['aKey'])
+    if mgiID in mirbaseDict:
+        aKeyList = mirbaseDict[mgiID]
+        for aKey  in aKeyList:
+            deleteAccession(aKey)
 
     # write out to assocload input file
     if mbIDs != '':
@@ -132,9 +145,6 @@ def processMirbase(mgiID, mbIDs):
 
 def deleteAccession(aKey):
     print("Deleting _accession_key = %s" % aKey)
-    # delete from ACC_AccessionReference first
-    db.sql('''delete from ACC_AccessionReference
-        where _Accession_key = %s''' % aKey, None)
     db.sql('''delete from ACC_Accession
         where _Accession_key = %s''' % aKey, None)
 
