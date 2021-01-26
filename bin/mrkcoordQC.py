@@ -414,7 +414,7 @@ def loadTempTables ():
         if miRBaseID != '':
             for id in str.split(miRBaseID, ','):
                 id = str.strip(id)
-                if str.find('MI', str.strip(id)) == -1:
+                if str.find('MI', str.strip(id)) == 0:
                     badIdList.append(id)
             if badIdList:
                 # report, go to next line
