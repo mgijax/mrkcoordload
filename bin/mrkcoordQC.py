@@ -336,7 +336,7 @@ def openFiles ():
     try:
         fpRptNamesRpt = open(rptNamesFile, 'a')
     except:
-        print('Cannot open report file: ' + invMrkRptFile)
+        print('Cannot open report file: ' + rptNamesFile)
         sys.exit(1)
     return
 
