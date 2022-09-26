@@ -89,7 +89,6 @@ def openFile ():
 # Throws: Nothing
 #
 def checkColumns ():
-    #print 'starting checkColumns'
     global errors
     lineNum = 1
     header = fpInput.readline()
@@ -109,17 +108,9 @@ def checkColumns ():
         if colError > 0:
             print('Missing Column(s): %s' % (columns))
             continue
-        # default
-        bad = 1
-
         # strand is optional
-        if columns[0] != '' and columns[1] != '' and columns[2] != '' and columns[3] != '' and columns[5] != '' and columns[6] != '':
-            bad = 0
-        # delete has only MGI ID, provider and display
-        elif columns[0] != '' and columns[1] == '' and columns[2] == '' and columns[3] == '' and columns[4] == '' and columns[5] != '' and columns[6] != '' :
-            bad = 0
-        if bad == 1:
-            print('Missing Data in required column: %s' % (columns))
+        if columns[0] == '' or columns[1] == '' or columns[2] == '' or columns[3] == '' or columns[5] == '' or columns[6] == '':
+            print('Missing Data in required column on line %s: %s' % (lineNum, columns))
         ### end code for missing data in req columns
     return
 
