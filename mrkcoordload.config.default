@@ -67,6 +67,10 @@ INPUT_FILE_QC=${OUTPUTDIR}/mrkcoordload_qc.txt
 
 export INPUT_FILE_DEFAULT INPUT_FILE_QC
 
+# Minimum number of lines expected for the input files (for sanity check).
+#
+FILE_MINIMUM_SIZE=2000
+
 # Full path to the load-ready coordinate file that is
 # created by the sanity/QC report script and used as input 
 # to the marker coordinate load
