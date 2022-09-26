@@ -308,12 +308,44 @@ checkMGIIDS ()
 }
 
 #
+# FUNCTION: Check an input file to make sure it has a minimum number of lines.
+#
+checkLineCount ()
+{
+    FILE=$1        # The input file to check
+    REPORT=$2      # The sanity report to write to
+    NUM_LINES=$3   # The minimum number of lines expected in the input file
+    REPORT=$2       # The sanity report to write to
+
+    COUNT=`cat ${FILE} | wc -l | sed 's/ //g'`
+
+    if [ ${COUNT} -lt ${NUM_LINES} ]
+    then
+        echo "" >> ${REPORT}
+        echo "" >> ${REPORT}
+        echo "**** WARNING ****" >> ${REPORT}
+        echo "${FILE} has ${COUNT} lines." >> ${REPORT}
+        echo "Expecting at least ${NUM_LINES} lines." >> ${REPORT}
+        echo ""  >> ${REPORT}
+        return 1
+    else
+        return 0
+    fi
+}
+
+#
 # Run sanity checks on the gene model input file.
 #
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Run sanity checks on the input file" >> ${LOG}
 FILE_ERROR=0
+
+checkLineCount ${INPUT_FILE_QC} ${SANITY_RPT} ${FILE_MINIMUM_SIZE} ${SANITY_RPT}
+if [ $? -ne 0 ]
+then
+    FILE_ERROR=1
+fi
 
 checkHeader ${INPUT_FILE_QC} ${SANITY_RPT}
 if [ $? -ne 0 ]
