@@ -1,3 +1,11 @@
+TAG: mrkcoordload-6-0-22-1
+DATE: 09/26/2022
+STAFF: sc
+CHANGES: WTS2-988 - mrkcoordload: update load QC checks
+1) add check for min rowcount of input file
+2) remove allowing empty columns for delete format (bug from 
+   the delete/reload update)
+
 TAG: mrkcoordload-6-0-17-1
 DATE: 05/11/2021
 STAFF: sc
