@@ -96,9 +96,11 @@ def checkColumns ():
         colError = 0
         lineNum = lineNum + 1
         columns = str.split(line, TAB)
+        #print('columns split: %s' % columns)
         # remove newline from last column
         last = columns[-1].strip()
         columns[-1] = last
+        #print('columns rm NL: %s' % columns)
         nc = len(columns) 
         if nc < numColumns:
             errors = errors + 1
@@ -106,7 +108,7 @@ def checkColumns ():
         ### start code for missing data in req columns
         # If errors then wrong number of columns exists; so continue to next
         if colError > 0:
-            print('Missing Column(s): %s' % (columns))
+            print('Missing Column(s) on line %s: %s' % (lineNum, columns))
             continue
         # strand is optional
         if columns[0] == '' or columns[1] == '' or columns[2] == '' or columns[3] == '' or columns[5] == '' or columns[6] == '':
