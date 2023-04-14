@@ -183,9 +183,13 @@ invChrList = ["' '"]
 timestamp = mgi_utils.date()
 
 errorCount = 0
+errorReportNames = []
+
+warningCount = 0
+warningReportNames = []
+
 fatalErrorCount = 0
 coordErrorCount = 0
-errorReportNames = []
 
 # MGI IDs that did not pass muster and will be removed
 # from the load-ready file
@@ -738,15 +742,16 @@ def createInvChrReport ():
 # Throws: Nothing
 #
 def createChrDiscrepReport ():
-    global errorCount, errorReportNames, invChrList
+    global errorCount, warningCount, errorReportNames, warningReportNames, invChrList
+    global badMGIIDs
 
     print('Create the chromosome discrepancy report')
     fpChrDiscrepRpt.write(str.center('Chromosome Discrepancy Report',96) + NL)
     fpChrDiscrepRpt.write(str.center('(' + timestamp + ')',96) + 2*NL)
-    fpChrDiscrepRpt.write('%-20s  %-50s  %-10s  %-10s%s' %
-                         ('MGI ID', 'Marker Symbol', 'Marker Chr','Feature Chr',NL))
-    fpChrDiscrepRpt.write(20*'-' + '  ' + 50*'-' + '  ' +
-                          10*'-' + '  ' + 10*'-' + NL)
+    fpChrDiscrepRpt.write('%-5s  %-20s  %-50s  %-10s  %-10s%s' %
+                         ('Load?', 'MGI ID', 'Marker Symbol', 'Marker Chr','Feature Chr',NL))
+    fpChrDiscrepRpt.write((5*'-' + '  ' + 20*'-' + '  ' + 50*'-' + '  ' +
+                          10*'-' + '  ' + 10*'-' + NL))
 
     #
     # Find any cases where the marker in the coordinate file has
@@ -772,23 +777,56 @@ def createChrDiscrepReport ():
                 and m.chromosome != tc.chromosome 
                 order by mgiID''' % (coordTempTable, ic), 'auto')
 
-
-    #
-    # Write the records to the report.
-    #
+    xyResults  = []
+    noloadResults = []
     for r in results:
+        fChr = r['fChr']
+        mChr = r['mChr']
+        if mChr == 'XY' and (fChr == 'X' or fChr == 'Y'):
+            xyResults.append(r)
+        else:
+            noloadResults.append(r)
+
+    for r in noloadResults:
         mgiID = r['mgiID']
 
-        fpChrDiscrepRpt.write('%-20s  %-50s  %-10s  %-10s%s' %
+        #
+        # If this is a live run of the load, maintain a list of MGI IDs that
+        # are being rejected. The input lines with these MGI IDs will be
+        # excluded from the new "load-ready" input file that gets created
+        # at the end of this script.
+        #
+        if liveRun == "1":
+            if mgiID not in badMGIIDs:
+                badMGIIDs[mgiID] = ''
+
+        fpChrDiscrepRpt.write('No    %-20s  %-50s  %-10s  %-10s%s' %
             (mgiID, r['symbol'], r['mChr'], r['fChr'], NL))
 
-    numErrors = len(results)
-    fpChrDiscrepRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
+    numErrors = len(noloadResults)
+
+    for r in xyResults:
+
+        fpChrDiscrepRpt.write('Yes    %-20s  %-50s  %-10s  %-10s%s' %
+            (r['mgiID'], r['symbol'], r['mChr'], r['fChr'], NL))
+
+    numWarnings = len(xyResults)
+
+    fpChrDiscrepRpt.write(NL + 'Number of Rows Not Loaded: ' + str(numErrors) + NL)
+    fpChrDiscrepRpt.write(NL + 'Number of Rows Loaded: ' + str(numWarnings) + NL)
 
     errorCount += numErrors
+    warningCount += numWarnings
+
+    if numWarnings > 0:
+        if not chrDiscrepRptFile in warningReportNames:
+            #print('appending chrDiscrepRptFile to warningReportNames')
+            warningReportNames.append(chrDiscrepRptFile + NL)
     if numErrors > 0:
         if not chrDiscrepRptFile in errorReportNames:
+            #print('appending chrDiscrepRptFile to errorReportNames')
             errorReportNames.append(chrDiscrepRptFile + NL)
+
     return
 
 
@@ -1283,9 +1321,13 @@ if fatalErrorCount > 0:
    sys.exit(3)
 if errorCount > 0:
     names = ''.join(errorReportNames )
+    fpRptNamesRpt.write('Reports with Errors: ' + NL )
     fpRptNamesRpt.write(names)
-    fpRptNamesRpt.close()
-    sys.exit(2)
-else:
-    fpRptNamesRpt.close()
-    sys.exit(0)
+    RC=2
+if warningCount > 0:
+    names = str.join('', warningReportNames)
+    fpRptNamesRpt.write('Reports with Warnings: ' + NL )
+    fpRptNamesRpt.write(names)
+    RC=2
+fpRptNamesRpt.close()
+sys.exit(0)
