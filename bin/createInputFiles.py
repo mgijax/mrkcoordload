@@ -57,8 +57,6 @@
 import sys
 import os
 import db
-import string
-import mgi_utils
 
 TAB = '\t'
 CRT = '\n'
