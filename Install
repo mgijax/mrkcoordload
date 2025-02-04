@@ -4,7 +4,8 @@
 # Installation script
 #
 # 1) cp mrkcoordload.config.default mrkcoordload.config
-# 2) Install
+# 2) cp mrkcoordloaddelete.config.default mrkcoordloaddelete.config
+# 3) Install
 #
 
 Usage=Install
@@ -34,6 +35,7 @@ cd `dirname $0`
 
 # establish the config files
 MAIN_CONFIG=mrkcoordload.config
+DELETE_CONFIG=mrkcoordloaddelete.config
 
 # Make sure config file exists and source it
 if [ -r ${MAIN_CONFIG} ]
@@ -42,6 +44,16 @@ then
     . ${MAIN_CONFIG}
 else
     echo "Cannot source configuration file: ${MAIN_CONFIG}"
+    installFailed
+fi
+
+# Make sure config file exists and source it
+if [ -r ${DELETE_CONFIG} ]
+then
+    echo "Source ${DELETE_CONFIG}"
+    . ${DELETE_CONFIG}
+else
+    echo "Cannot source configuration file: ${DELETE_CONFIG}"
     installFailed
 fi
 
@@ -120,7 +132,7 @@ if [ -d ${DEPLOY_PATH} ]; then
 	# deployment errors are non-fatal, as they can occur regularly in an
 	# SE's development area
 
-	for file in runMrkCoordQC publishCoordFile
+	for file in runMrkCoordQC publishCoordFile runMrkCoordDeleteQC publishCoordDeleteFile
 	do
 		cp bin/${file} ${DEPLOY_PATH}
 		if [ $? -ne 0 ]; then

@@ -4,8 +4,7 @@
 #
 #  Purpose:
 #
-#      This script will generate a set of QC reports for 
-#      marker coordinate load file
+#      This script will generate a set of QC reports for marker coordinate load file
 #
 #  Usage:
 #
@@ -16,19 +15,19 @@
 #      The following environment variables are set by the configuration
 #      files that are sourced by the wrapper script:
 #
-#          MGD_DBUSER
-#          MGD_DBPASSWORDFILE
-#          TEMP_TABLE
-#          INVALID_MARKER_RPT
-#          SEC_MARKER_RPT
+#      MGD_DBUSER
+#      MGD_DBPASSWORDFILE
+#      TEMP_TABLE
+#      INVALID_MARKER_RPT
+#      SEC_MARKER_RPT
 #	   INVALID_CHR_RPT
-#          CHR_DISCREP_RPT
+#      CHR_DISCREP_RPT
 #	   INVALID_COORD_STRAND_RPT
 #	   NON_MIRNA_MARKER_RPT
 #	   MIRBASE_DELETE_RPT
-#          MIRBASE_DUP_RPT
+#      MIRBASE_DUP_RPT
 #	   MIRBASE_OTHER_MKR_RPT
-#          MIRBASE_INVALID_ID_RPT
+#      MIRBASE_INVALID_ID_RPT
 #	   SOURCE_DISPLAY_RPT
 #	   BUILD_RPT
 #	   RPT_NAMES_RPT
@@ -36,20 +35,21 @@
 #
 #      The following environment variable is set by the wrapper script:
 #
-#          LIVE_RUN
+#      LIVE_RUN
 #
 #  Inputs:
 #
 #      - Coordinate input file with the following tab-delimited fields:
 #
-#          1) MGI ID
-#          2) Chromosome
-#          3) Start Coordinate
-#          4) End Coordinate
-#          5) Strand (+ or -)
-#          6) Provider
+#      1) MGI ID
+#      2) Chromosome
+#      3) Start Coordinate
+#      4) End Coordinate
+#      5) Strand (+ or -)
+#      6) Provider
 #	   7) Display
 #	   8) miRBase ID (optional)
+#	   9) curator notes (optional)
 #
 #  Outputs:
 #
@@ -57,31 +57,18 @@
 #        into a temp table
 #
 #      - QC report (${INVALID_MARKER_RPT})
-#
 #      - QC report (${SEC_MARKER_RPT})
-#
 #      - QC report (${INVALID_CHR_RPT})
-#
 #      - QC report (${CHR_DISCREP_RPT})
-#
 #      - QC report (${INVALID_COORD_STRAND_RPT})
-#
 #      - QC report (${NON_MIRNA_MARKER_RPT})
-#
 #      - QC report (${MIRBASE_DELETE_RPT})
-#
 #      - QC report (${MIRBASE_DUP_RPT})
-#
 #      - QC report (${MIRBASE_OTHER_MKR_RPT})
-#
 #      - QC report (${ MIRBASE_INVALID_ID_RPT})
-#
 #      - QC report (${SOURCE_DISPLAY_RPT})
-#
 #      - QC report (${BUILD_RPT})
-#
 #      - QC report (${RPT_NAMES_RPT})
-#
 #      - Load-ready input file (${INPUT_FILE_LOAD})
 #
 #  Exit Codes:
@@ -138,7 +125,6 @@ TAB = '\t'
 NL = '\n'
 
 USAGE = 'mrkcoordQC.py coordinate_file'
-
 
 #
 #  GLOBALS
@@ -223,7 +209,6 @@ def checkArgs ():
     coordFile = sys.argv[1]
     return
 
-
 #
 # Purpose: Perform initialization steps.
 # Returns: Nothing
@@ -240,7 +225,6 @@ def init ():
     db.set_sqlPasswordFromFile(passwordFileName)
 
     return
-
 
 #
 # Purpose: Open the files.
@@ -344,7 +328,6 @@ def openFiles ():
         sys.exit(1)
     return
 
-
 #
 # Purpose: Close the files.
 # Returns: Nothing
@@ -370,7 +353,6 @@ def closeFiles ():
     fpSourceDisplayRpt.close()
     fpBuildRpt.close()
     return
-
 
 #
 # Purpose: Load the data from the input files into the temp tables.
@@ -441,6 +423,7 @@ def loadTempTables ():
                       strand + TAB + source + TAB + display + TAB +
                       miRBaseID + TAB + build + NL)
         count += 1
+
     writeInvcoordStrandFooter()
 
     #
@@ -454,8 +437,7 @@ def loadTempTables ():
     print('Load the coordinate data into the temp table: ' + coordTempTable)
 
     bcpCmd = '%s %s %s %s "/" %s "\\t" "\\n" mgd' % \
-        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(),coordTempTable,
-        coordBCPFile)
+        (bcpCommand, db.get_sqlServer(), db.get_sqlDatabase(), coordTempTable, coordBCPFile)
 
     print('bcp cmd = %s' % bcpCmd)
     sys.stdout.flush()
@@ -472,8 +454,7 @@ def writeInvcoordStrandHeader():
     fpInvCoordStrandRpt.write(str.center('Invalid Coordinate and Strand Report',110) + NL)
     fpInvCoordStrandRpt.write(str.center('(' + timestamp + ')',110) + 2*NL)
     fpInvCoordStrandRpt.write('%-12s  %-20s  %-20s  %-10s  %-20s  %-30s%s' %
-                     ('MGI ID','Start Coordinate','End Coordinate', 'Strand',
-                      'Provider','Reason',NL))
+                     ('MGI ID','Start Coordinate','End Coordinate', 'Strand', 'Provider','Reason',NL))
     fpInvCoordStrandRpt.write(12*'-' + '  ' + 20*'-' + '  ' + 20*'-' + '  ' + \
                       10*'-' + '  ' + 20*'-' + '  ' + 30*'-' + NL)
     return
@@ -481,7 +462,6 @@ def writeInvcoordStrandHeader():
 def writeInvcoordStrandFooter():
     fpInvCoordStrandRpt.write(NL + 'Number of Rows: ' + str(coordErrorCount) + NL)
     return
-
 
 #
 # Purpose: Create the invalid marker report.
@@ -499,8 +479,7 @@ def createInvMarkerReport ():
     fpInvMrkRpt.write('%-12s  %-20s  %-20s  %-30s%s' %
                      ('MGI ID','Associated Object',
                       'Marker Status','Reason',NL))
-    fpInvMrkRpt.write(12*'-' + '  ' +  20*'-' + '  ' + \
-                      20*'-' + '  ' + 30*'-' + NL)
+    fpInvMrkRpt.write(12*'-' + '  ' +  20*'-' + '  ' + 20*'-' + '  ' + 30*'-' + NL)
 
     #
     # Find any MGI IDs from the coordinate file that:
@@ -610,30 +589,26 @@ def createSecMarkerReport ():
     fpSecMrkRpt.write('%-16s  %-50s  %-16s%s' %
                      ('Secondary MGI ID',
                       'Marker Symbol','Primary MGI ID',NL))
-    fpSecMrkRpt.write(16*'-' + '  ' + 50*'-' + '  ' + \
-                      16*'-' + NL)
+    fpSecMrkRpt.write(16*'-' + '  ' + 50*'-' + '  ' + 16*'-' + NL)
 
     #
     # Find any MGI IDs from the coordinate file that are secondary IDs
     # for a marker.
     #
-    results = db.sql('select tmp.mgiID, ' + \
-                       'm.symbol, ' + \
-                       'a2.accID ' + \
-                'from ' + coordTempTable + ' tmp, ' + \
-                     'ACC_Accession a1, ' + \
-                     'ACC_Accession a2, ' + \
-                     'MRK_Marker m ' + \
-                'where tmp.mgiID = a1.accID and ' + \
-                      'a1._MGIType_key = 2 and ' + \
-                      'a1._LogicalDB_key = 1 and ' + \
-                      'a1.preferred = 0 and ' + \
-                      'a1._Object_key = a2._Object_key and ' + \
-                      'a2._MGIType_key = 2 and ' + \
-                      'a2._LogicalDB_key = 1 and ' + \
-                      'a2.preferred = 1 and ' + \
-                      'a2._Object_key = m._Marker_key ' + \
-                'order by mgiID', 'auto')
+    results = db.sql('''
+        select tmp.mgiID, m.symbol, a2.accID 
+        from %s tmp, ACC_Accession a1, ACC_Accession a2, MRK_Marker m
+        where tmp.mgiID = a1.accID 
+        and a1._MGIType_key = 2 
+        and a1._LogicalDB_key = 1 
+        and a1.preferred = 0 
+        and a1._Object_key = a2._Object_key 
+        and a2._MGIType_key = 2 
+        and a2._LogicalDB_key = 1 
+        and a2.preferred = 1 
+        and a2._Object_key = m._Marker_key
+        order by mgiID
+        '''% (coordTempTable), 'auto')
 
     #
     # Write the records to the report.
@@ -641,8 +616,7 @@ def createSecMarkerReport ():
     for r in results:
         mgiID = r['mgiID']
 
-        fpSecMrkRpt.write('%-16s  %-50s  %-16s%s' %
-            (mgiID, r['symbol'], r['accID'], NL))
+        fpSecMrkRpt.write('%-16s  %-50s  %-16s%s' % (mgiID, r['symbol'], r['accID'], NL))
 
         #
         # If this is a live run of the load, maintain a list of MGI IDs that
@@ -663,7 +637,6 @@ def createSecMarkerReport ():
             errorReportNames.append(secMrkRptFile + NL)
     return
 
-
 #
 # Purpose: Create the invalid chromosome report.
 # Returns: Nothing
@@ -675,35 +648,29 @@ def createInvChrReport ():
     global errorCount, errorReportNames, invChrList, badMGIIDs
 
     print('Create the invalid chromosome report')
-    fpInvChrRpt.write(str.center('Invalid Chromosome Report',96) + NL
-)
+    fpInvChrRpt.write(str.center('Invalid Chromosome Report',96) + NL)
     fpInvChrRpt.write(str.center('(' + timestamp + ')',96) + 2*NL)
-    fpInvChrRpt.write('%-20s  %-50s  %-10s%s' %
-                         ('MGI ID', 'Marker Symbol', 'Invalid Chr', NL))
-    fpInvChrRpt.write(20*'-' + '  ' + 50*'-' + '  ' +
-                          10*'-' + '  ' + NL)
+    fpInvChrRpt.write('%-20s  %-50s  %-10s%s' % ('MGI ID', 'Marker Symbol', 'Invalid Chr', NL))
+    fpInvChrRpt.write(20*'-' + '  ' + 50*'-' + '  ' + 10*'-' + '  ' + NL)
 
     #
     # Find any cases where the feature chromosome is not a valid
     # mouse chromosome
     #
-    results = db.sql('''select tc.mgiID,
-                       tc.chromosome,
-                       tc.mgiID,
-                       m.symbol
-                from %s tc,
-                     ACC_Accession a,
-                     MRK_Marker m
-                where tc.mgiID = a.accID
-                and a._MGIType_key = 2
-                and a._LogicalDB_key = 1
-                and a.preferred = 1
-                and a._Object_key = m._Marker_key
-                and tc.chromosome not in (select mc.chromosome
+    results = db.sql('''
+        select tc.mgiID, tc.chromosome, tc.mgiID, m.symbol
+        from %s tc, ACC_Accession a, MRK_Marker m
+        where tc.mgiID = a.accID
+        and a._MGIType_key = 2
+        and a._LogicalDB_key = 1
+        and a.preferred = 1
+        and a._Object_key = m._Marker_key
+        and tc.chromosome not in (select mc.chromosome
                     from MRK_Chromosome mc
                     where mc._Organism_key = 1
                     and mc.chromosome != 'UN')
-                order by mgiID''' % coordTempTable, 'auto')
+        order by mgiID
+        ''' % (coordTempTable), 'auto')
 
     #
     # Write the records to the report.
@@ -711,8 +678,7 @@ def createInvChrReport ():
     for r in results:
         mgiID = r['mgiID']
         invChrList.append('"%s"' % r['chromosome'])
-        fpInvChrRpt.write('%-20s  %-50s  %-10s%s' %
-            (mgiID, r['symbol'], r['chromosome'], NL))
+        fpInvChrRpt.write('%-20s  %-50s  %-10s%s' % (mgiID, r['symbol'], r['chromosome'], NL))
 
         #
         # If this is a live run of the load, maintain a list of MGI IDs that
@@ -733,7 +699,6 @@ def createInvChrReport ():
             errorReportNames.append(invChrRptFile + NL)
     return
 
-
 #
 # Purpose: Create the chromosome discrepancy report.
 # Returns: Nothing
@@ -748,10 +713,8 @@ def createChrDiscrepReport ():
     print('Create the chromosome discrepancy report')
     fpChrDiscrepRpt.write(str.center('Chromosome Discrepancy Report',96) + NL)
     fpChrDiscrepRpt.write(str.center('(' + timestamp + ')',96) + 2*NL)
-    fpChrDiscrepRpt.write('%-5s  %-20s  %-50s  %-10s  %-10s%s' %
-                         ('Load?', 'MGI ID', 'Marker Symbol', 'Marker Chr','Feature Chr',NL))
-    fpChrDiscrepRpt.write((5*'-' + '  ' + 20*'-' + '  ' + 50*'-' + '  ' +
-                          10*'-' + '  ' + 10*'-' + NL))
+    fpChrDiscrepRpt.write('%-5s  %-20s  %-50s  %-10s  %-10s%s' % ('Load?', 'MGI ID', 'Marker Symbol', 'Marker Chr','Feature Chr',NL))
+    fpChrDiscrepRpt.write((5*'-' + '  ' + 20*'-' + '  ' + 50*'-' + '  ' + 10*'-' + '  ' + 10*'-' + NL))
 
     #
     # Find any cases where the marker in the coordinate file has
@@ -761,21 +724,18 @@ def createChrDiscrepReport ():
     # exclude invalid chromosomes
     ic =  ','.join(invChrList)
     
-    results = db.sql('''select tc.mgiID, 
-                       tc.chromosome as fChr, 
-                       m.symbol, 
-                       m.chromosome as mChr
-                from %s tc, 
-                     ACC_Accession a, 
-                     MRK_Marker m 
-                where tc.chromosome not in (%s)
-                and tc.mgiID = a.accID 
-                and a._MGIType_key = 2 
-                and a._LogicalDB_key = 1 
-                and a.preferred = 1 
-                and a._Object_key = m._Marker_key 
-                and m.chromosome != tc.chromosome 
-                order by mgiID''' % (coordTempTable, ic), 'auto')
+    results = db.sql('''
+        select tc.mgiID, tc.chromosome as fChr, m.symbol, m.chromosome as mChr
+        from %s tc, ACC_Accession a, MRK_Marker m 
+        where tc.chromosome not in (%s)
+        and tc.mgiID = a.accID 
+        and a._MGIType_key = 2 
+        and a._LogicalDB_key = 1 
+        and a.preferred = 1 
+        and a._Object_key = m._Marker_key 
+        and m.chromosome != tc.chromosome 
+        order by mgiID
+        ''' % (coordTempTable, ic), 'auto')
 
     xyResults  = []
     noloadResults = []
@@ -800,15 +760,13 @@ def createChrDiscrepReport ():
             if mgiID not in badMGIIDs:
                 badMGIIDs[mgiID] = ''
 
-        fpChrDiscrepRpt.write('No    %-20s  %-50s  %-10s  %-10s%s' %
-            (mgiID, r['symbol'], r['mChr'], r['fChr'], NL))
+        fpChrDiscrepRpt.write('No    %-20s  %-50s  %-10s  %-10s%s' % (mgiID, r['symbol'], r['mChr'], r['fChr'], NL))
 
     numErrors = len(noloadResults)
 
     for r in xyResults:
 
-        fpChrDiscrepRpt.write('Yes    %-20s  %-50s  %-10s  %-10s%s' %
-            (r['mgiID'], r['symbol'], r['mChr'], r['fChr'], NL))
+        fpChrDiscrepRpt.write('Yes    %-20s  %-50s  %-10s  %-10s%s' % (r['mgiID'], r['symbol'], r['mChr'], r['fChr'], NL))
 
     numWarnings = len(xyResults)
 
@@ -828,7 +786,6 @@ def createChrDiscrepReport ():
             errorReportNames.append(chrDiscrepRptFile + NL)
 
     return
-
 
 #
 # Purpose: Create the invalid coordinate and strand report.
@@ -885,7 +842,6 @@ def createInvCoordStrandReport (mgiID, startCoordinate, endCoordinate, strand, s
 
     return numErrors
 
-
 #
 # Purpose: Create the non-miRNA marker report.
 # Returns: Nothing
@@ -911,18 +867,19 @@ def createNonMirnaMarkerReport ():
     # we use tc.mirbaseID like "%MI%" because mirbaseID is a text field
     #  and only like is allowed for a text field in the where clause 
     #
-    sql = 'select tc.mgiID, tc.mirbaseID, m.term from %s tc, ACC_Accession a, MRK_MCV_Cache m ' % (coordTempTable)
-    results = db.sql(sql + \
-        '''where tc.mirbaseID like '%MI%' and
-          tc.mgiID = a.accID and 
-          a._MGIType_key = 2 and 
-          a._LogicalDB_key = 1 and 
-          a.preferred = 1 and 
-          a._Object_key = m._Marker_key and 
-          m.qualifier = 'D' and 
-          m.term != 'miRNA gene'
+    results = db.sql('''
+        select tc.mgiID, tc.mirbaseID, m.term 
+        from %s tc, ACC_Accession a, MRK_MCV_Cache m
+        where tc.mirbaseID like '%MI%'
+        and tc.mgiID = a.accID
+        and a._MGIType_key = 2
+        and a._LogicalDB_key = 1
+        and a.preferred = 1
+        and a._Object_key = m._Marker_key 
+        and m.qualifier = 'D'
+        and m.term != 'miRNA gene'
         order by mgiID
-        ''', 'auto')
+        ''' % (coordTempTable), 'auto')
 
     #
     # Write the records to the report.
@@ -931,9 +888,7 @@ def createNonMirnaMarkerReport ():
         mgiID = r['mgiID']
         mirbaseID = r['mirbaseID']
         featureType = r['term']
-
-        fpNonMirnaMrkRpt.write('%-16s  %-50s  %-16s%s' %
-            (mgiID, featureType, mirbaseID, NL))
+        fpNonMirnaMrkRpt.write('%-16s  %-50s  %-16s%s' % (mgiID, featureType, mirbaseID, NL))
 
     numErrors = len(results)
     fpNonMirnaMrkRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
@@ -961,13 +916,13 @@ def createMirbaseDeleteReport ():
                      ('Input MGI ID','Input Symbol','miRBase/Marker Associations To Be Added', 'miRBase/Marker Associations To Be Deleted',NL))
     fpMirbaseDeleteRpt.write(16*'-' + '  ' + 16*'-' + '  ' + 60*'-' + '  ' + 60*'-' + NL)
 
-
     #
     # For each marker in the input report mirbase IDs being deleted 
     # from the database and mirbase IDs being added
     #
     db.useOneConnection(1)
-    db.sql('''select a.accid as mgiID, m._Marker_key, m.symbol
+    db.sql('''
+        select a.accid as mgiID, m._Marker_key, m.symbol
         into temp mkrs
         from ACC_Accession a, MRK_Marker m
         where m._Organism_key = 1
@@ -979,11 +934,11 @@ def createMirbaseDeleteReport ():
 
     db.sql('create index idx1 on mkrs(_Marker_key)', None)
 
-    results = db.sql('''select m.*, a.accid as mbID
+    results = db.sql('''
+        select m.*, a.accid as mbID
         from mkrs m 
         left outer join
-        ACC_Accession a on
-                m._marker_key=a._object_key
+        ACC_Accession a on m._marker_key=a._object_key
         where a._MGIType_key = 2
         and a._LogicalDB_key = 83''', 'auto')
 
@@ -1065,16 +1020,14 @@ def createDupMirbaseIdReport():
     print('Create the duplicate miRBase ID report')
     fpDupMirbaseIdRpt.write(str.center('Duplicate miRBase ID Report',108) + NL)
     fpDupMirbaseIdRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
-    fpDupMirbaseIdRpt.write('%-16s  %-40s%s' %
-                     ('Input miRBase ID', 'Associated MGI IDs', NL))
+    fpDupMirbaseIdRpt.write('%-16s  %-40s%s' % ('Input miRBase ID', 'Associated MGI IDs', NL))
     fpDupMirbaseIdRpt.write(16*'-' + '  ' + 50*'-' + NL)
 
     numErrors = 0
     for mbId in list(mb2mgiInInputDict.keys()):
         mgiIdList = mb2mgiInInputDict[mbId]
         if len(mgiIdList) > 1:
-            fpDupMirbaseIdRpt.write('%-16s  %-50s%s' % 
-                (mbId, ','.join(mgiIdList), NL ) )
+            fpDupMirbaseIdRpt.write('%-16s  %-50s%s' % (mbId, ','.join(mgiIdList), NL ) )
             numErrors += 1
     fpDupMirbaseIdRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
@@ -1097,7 +1050,8 @@ def createMirbaseOtherMrkReport():
 
     print('Create the miRBase ID associated with other marker report')
     db.useOneConnection(1)
-    db.sql('''select a.accid as mgiID, mm._Marker_key
+    db.sql('''
+        select a.accid as mgiID, mm._Marker_key
         into temp mkrs
         from ACC_Accession a, MRK_Marker mm, MRK_Location_Cache m
         where mm._Organism_key = 1
@@ -1109,11 +1063,11 @@ def createMirbaseOtherMrkReport():
 
     db.sql('create index idx1 on mkrs(_Marker_key)', None)
 
-    results = db.sql('''select m.*, a.accid as mbID
+    results = db.sql('''
+        select m.*, a.accid as mbID
         from mkrs m 
         left outer join
-         ACC_Accession a on
-                m._marker_key=a._object_key
+         ACC_Accession a on m._marker_key=a._object_key
         where a._MGIType_key = 2
         and a._LogicalDB_key = 83''', 'auto')
 
@@ -1130,8 +1084,7 @@ def createMirbaseOtherMrkReport():
 
     fpMirbaseOtherMrkRpt.write(str.center('miRBase IDs in the Input Associated with Different Markers in MGI Report',108) + NL)
     fpMirbaseOtherMrkRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
-    fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' %
-                     ('Input miRBase ID','Input MGI IDs', 'Database MGI IDs',NL))
+    fpMirbaseOtherMrkRpt.write('%-16s  %-40s  %-40s%s' % ('Input miRBase ID','Input MGI IDs', 'Database MGI IDs',NL))
     fpMirbaseOtherMrkRpt.write(16*'-' + '  ' + 40*'-' + '  ' + 40*'-' + NL)
  
     numErrors = 0

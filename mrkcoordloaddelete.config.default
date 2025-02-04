@@ -1,0 +1,64 @@
+#format: sh
+#
+#  Configuration for Marker Coordinate Delete
+#
+###########################################################################
+
+#
+#  If the MGICONFIG environment variable does not have a local override,
+#  use the default "live" settings.
+#
+if [ "${MGICONFIG}" = "" ]
+then
+    MGICONFIG=/usr/local/mgi/live/mgiconfig
+    export MGICONFIG
+fi
+
+CONFIG_MASTER=${MGICONFIG}/master.config.sh
+export CONFIG_MASTER
+
+. ${CONFIG_MASTER}
+
+# Full path the the logs, reports, and archive directories 
+FILEDIR=${DATALOADSOUTPUT}/mgi/mrkcoordload
+
+# Full path to the input, output, logs, reports and archive directories.
+INPUTDIR=${FILEDIR}/input
+LOGDIR=${FILEDIR}/logs
+RPTDIR=${FILEDIR}/reports
+OUTPUTDIR=${FILEDIR}/output
+ARCHIVEDIR=${FILEDIR}/archive
+export INPUTDIR FILEDIR LOGDIR RPTDIR OUTPUTDIR ARCHIVEDIR
+
+# Full path name of the input file
+INPUT_FILE_NAME=mrkcoorddelete.txt
+INPUT_FILE_DEFAULT=${INPUTDIR}/${INPUT_FILE_NAME}
+export INPUT_FILE_DEFAULT INPUT_FILE_NAME
+
+PUBLISHDIR=/data/mrkcoord/
+PUBLISHCURRENT=${PUBLISHDIR}/current
+PUBLISHPENDING=${PUBLISHDIR}/pending
+export PUBLISHDIR PUBLISHCURRENT PUBLISHPENDING
+
+#  Full path name of the log files
+LOG_PROC=${LOGDIR}/mrkcoorddelete.proc.log
+LOG_DIAG=${LOGDIR}/mrkcoorddelete.diag.log
+LOG_CUR=${LOGDIR}/mrkcoorddelete.cur.log
+LOG_VAL=${LOGDIR}/mrkcoorddelete.val.log
+LOG_ERROR=${LOGDIR}/mrkcoorddelete.error.log
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_ERROR
+
+# this load's login value for jobstream 
+JOBSTREAM=mrkcoordload
+export JOBSTREAM
+
+###########################################################################
+#  The name of the load for the subject of an email notification
+# will be set by wrapper based on collection for each load
+MAIL_LOADNAME="Marker Coordinate Deletion"
+export MAIL_LOADNAME
+
+#  INSTALLDIR expected by dlautils/DLAInstall
+INSTALLDIR=${MRKCOORDLOAD}
+export INSTALLDIR
+

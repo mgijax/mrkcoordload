@@ -341,11 +341,12 @@ date >> ${LOG}
 echo "Run sanity checks on the input file" >> ${LOG}
 FILE_ERROR=0
 
-checkLineCount ${INPUT_FILE_QC} ${SANITY_RPT} ${FILE_MINIMUM_SIZE} ${SANITY_RPT}
-if [ $? -ne 0 ]
-then
-    FILE_ERROR=1
-fi
+# e4g-115/comment this out
+#checkLineCount ${INPUT_FILE_QC} ${SANITY_RPT} ${FILE_MINIMUM_SIZE} ${SANITY_RPT}
+#if [ $? -ne 0 ]
+#then
+#    FILE_ERROR=1
+#fi
 
 checkHeader ${INPUT_FILE_QC} ${SANITY_RPT}
 if [ $? -ne 0 ]

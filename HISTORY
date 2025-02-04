@@ -1,3 +1,12 @@
+TAG: mrkcoordload-6-0-25-1
+DATE: 02/03/2025
+STAFF: lec
+CHANGES: 
+wts2-1600/e4g-115/Marker Coordinate Load changes
+loadadmin/prod/dailytasks.csh
+	{MRKCOORDLOAD}/bin/mrkcoordload.sh
+	{MRKCOORDLOAD}/bin/mrkcoordDelete.sh
+
 TAG: mrkcoordload-6-0-22-4
 DATE: 04/14/2023
 STAFF: sc
@@ -10,8 +19,7 @@ DATE: 09/26/2022
 STAFF: sc
 CHANGES: WTS2-988 - mrkcoordload: update load QC checks
 1) add check for min rowcount of input file
-2) remove allowing empty columns for delete format (bug from 
-   the delete/reload update)
+2) remove allowing empty columns for delete format (bug from the delete/reload update)
 
 TAG: mrkcoordload-6-0-17-1
 DATE: 05/11/2021

@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+#  runMrkCoordDeleteQC
+###########################################################################
+#
+# A copy of this script is intended to reside in /usr/local/bin on all
+# servers to make it available in the common PATH.
+#
+###########################################################################
+
+if [ -z ${MGICONFIG} ]
+then
+        MGICONFIG=/usr/local/mgi/live/mgiconfig
+	export MGICONFIG
+fi
+
+. ${MGICONFIG}/master.config.sh
+CONFIG=${MRKCOORDLOAD}/mrkcoordloaddelete.config
+
+usage ()
+{
+    echo "Usage: runMrkCoordDeleteQC input_file"
+    echo "       where"
+    echo "           input_file = path to the strain input file"
+    exit 1
+}
+
+#
+# Make sure the load product exists on this server
+#
+if [ ! -d ${MRKCOORDLOAD} ]
+then
+    echo "The curatorstrainload software does not exist on this server"; exit 1
+fi
+
+#
+# Make sure an input file was passed as an argument to the script.
+#
+if [ $# -eq 1 ]
+then
+    if [ ! -r $1 ]
+    then
+        echo "Input file does not exist: $1"; exit 1
+    fi
+else
+    usage
+fi
+
+#
+# Make sure the configuration file exists and source it.
+#
+if [ -f ${CONFIG} ]
+then
+    . ${CONFIG}
+else
+    echo "Missing configuration file: ${CONFIG}"
+    exit 1
+fi
+
+#
+# Convert input file
+# Invoke the load using santiy check mode
+# and the arguments that were passed to this script.
+#
+dos2unix $1 $1 2>/dev/null
+${PYTHON} ${MRKCOORDLOAD}/bin/mrkcoordDelete.py $1 preview
+cat $1.error
+

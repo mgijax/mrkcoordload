@@ -207,8 +207,8 @@ do
     MAIL_LOADNAME="${COORD_COLLECTION_NAME}, ${MAIL_LOADNAME}"
     export MAIL_LOADNAME
 
-     echo "" >> ${LOG_DIAG}
-     echo "`date`" >> ${LOG_DIAG}
+    echo "" >> ${LOG_DIAG}
+    echo "`date`" >> ${LOG_DIAG}
     echo "Running ${COORD_COLLECTION_NAME} mrkcoordload" | tee -a ${LOG_DIAG} ${LOG_PROC}
     ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
         -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD} \
@@ -231,7 +231,6 @@ then
     ${ASSOCLOADER_SH} ${CONFIG_LOAD} ${ASSOCLOADCONFIG} >> ${LOG_DIAG}
     STAT=$?
     checkStatus ${STAT} "${ASSOCLOADER_SH}"
-
 fi
 
 #
@@ -240,6 +239,16 @@ fi
 if [ ${STAT} = 0 ]
 then
     touch ${LASTRUN_FILE}
+fi
+
+#
+# Remove snpcacheload/output/lastrun so that the snpcacheload will run from the Pipeline
+if ( "`uname -n | cut -d'.' -f1`" == "bhmgiapp01" )
+then
+	ssh mgiadmin@bhmgidb03lp 'rm -rf ${DATALOADSOUTPUT}/snpcacheload/output/lastrun'
+elif ( "`uname -n | cut -d'.' -f1`" == "bhmgidevapp01" )
+then
+	ssh mgiadmin@bhmgidb05ld 'rm -rf ${DATALOADSOUTPUT}/snpcacheload/output/lastrun'
 fi
 
 #
