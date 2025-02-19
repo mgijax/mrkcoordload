@@ -184,9 +184,9 @@ def processFile():
 
     #	end of "for line in inputFile.readlines():"
 
-    print(deleteSQL)
-    #db.sql(deleteSQL, None)
-    #db.commit()
+    if deleteSQL != "":
+        db.sql(deleteSQL, None)
+        db.commit()
 
     return
 
