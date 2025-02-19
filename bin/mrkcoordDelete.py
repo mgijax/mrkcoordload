@@ -21,8 +21,6 @@ import db
 import mgi_utils
 import loadlib
 
-#db.setTrace()
-
 inputFileName = ''
 mode = ''
 isSanityCheck = 0
@@ -185,6 +183,7 @@ def processFile():
     #	end of "for line in inputFile.readlines():"
 
     if deleteSQL != "":
+        db.setTrace()
         db.sql(deleteSQL, None)
         db.commit()
 
