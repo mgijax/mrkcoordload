@@ -21,6 +21,8 @@ import db
 import mgi_utils
 import loadlib
 
+#db.setTrace()
+
 inputFileName = ''
 mode = ''
 isSanityCheck = 0
@@ -147,26 +149,32 @@ def processFile():
 
         try:
             mgiId = tokens[0]
-            mapId = tokens[1]
+            collection = tokens[1]
             #print(tokens)
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 
         results = db.sql('''
-            select mc._feature_key from acc_accession ma, acc_accession ca, map_coord_feature mc
-            where ma.accid = '%s' 
-            and ma._logicaldb_key = 1
+            select ma.accid, m.symbol, ma._object_key, l.provider,
+                mcf._feature_key, mcf.startcoordinate, mcf.endcoordinate,
+                mcc._collection_key, mcc.name
+            from acc_accession ma, mrk_marker m, mrk_location_cache l, 
+                map_coord_feature mcf, map_coordinate mc, map_coord_collection mcc
+            where ma.accid = '%s'
             and ma._mgitype_key = 2
+            and ma._logicaldb_key = 1
             and ma.preferred = 1
-            and ca.accid = '%s'
-            and ca._logicaldb_key not in (1,8,9,117,118)
-            and ca._mgitype_key = 2
-            and ma._object_key = mc._object_key
-            and mc._mgitype_key = 2
-            ''' % (mgiId, mapId), 'auto')
+            and ma._object_key = m._marker_key
+            and ma._object_key = mcf._object_key
+            and mcf._mgitype_key = 2
+            and mcf._map_key = mc._map_key
+            and mc._collection_key = mcc._collection_key
+            and mcc.name = '%s'
+            and ma._object_key = l._marker_key
+            ''' % (mgiId, collection), 'auto')
 
         if len(results) == 0:
-            errorFile.write('Invalid Mapping Coordinate (row %d) %s %s\n' % (lineNum, mgiId, mapId))
+            errorFile.write('Invalid Mapping Coordinate (row %d) %s %s\n' % (lineNum, mgiId, collection))
             hasFatalError += 1
 
         # if no errors, process
@@ -179,6 +187,7 @@ def processFile():
 
         key = results[0]['_feature_key']
         deleteSQL = deleteSQL + ''' delete from MAP_Coord_Feature where _feature_key = %s;\n ''' % (key)
+        #print(results)
 
     #	end of "for line in inputFile.readlines():"
 
