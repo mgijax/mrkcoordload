@@ -243,13 +243,15 @@ fi
 
 #
 # Remove snpcacheload/output/lastrun so that the snpcacheload will run from the Pipeline
-if ( "`uname -n | cut -d'.' -f1`" == "bhmgiapp01" )
-then
+case `uname -n` in
+bhmgiapp01) 
 	ssh mgiadmin@bhmgidb03lp 'rm -rf ${DATALOADSOUTPUT}/snpcacheload/output/lastrun'
-elif ( "`uname -n | cut -d'.' -f1`" == "bhmgidevapp01" )
-then
+	;;
+bhmgidevapp01) 
 	ssh mgiadmin@bhmgidb05ld 'rm -rf ${DATALOADSOUTPUT}/snpcacheload/output/lastrun'
-fi
+	;;
+*) ;;
+esac
 
 #
 # run postload cleanup and email logs

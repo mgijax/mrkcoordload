@@ -150,7 +150,6 @@ def processFile():
         try:
             mgiId = tokens[0]
             collection = tokens[1]
-            #print(tokens)
         except:
             exit(1, 'Invalid Line (%d): %s\n' % (lineNum, line))
 

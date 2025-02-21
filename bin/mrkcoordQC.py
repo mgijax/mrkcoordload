@@ -608,7 +608,7 @@ def createSecMarkerReport ():
         and a2.preferred = 1 
         and a2._Object_key = m._Marker_key
         order by mgiID
-        '''% (coordTempTable), 'auto')
+        ''' % (coordTempTable), 'auto')
 
     #
     # Write the records to the report.
@@ -855,8 +855,7 @@ def createNonMirnaMarkerReport ():
     print('Create the non-miRNA marker report')
     fpNonMirnaMrkRpt.write(str.center('Non-miRNA Marker Report',108) + NL)
     fpNonMirnaMrkRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
-    fpNonMirnaMrkRpt.write('%-16s  %-50s  %-16s%s' %
-                     ('MGI ID','Feature Type','miRBase ID',NL))
+    fpNonMirnaMrkRpt.write('%-16s  %-50s  %-16s%s' % ('MGI ID','Feature Type','miRBase ID',NL))
     fpNonMirnaMrkRpt.write(16*'-' + '  ' + 50*'-' + '  ' + 16*'-' + NL)
 
     #
@@ -867,9 +866,10 @@ def createNonMirnaMarkerReport ():
     # we use tc.mirbaseID like "%MI%" because mirbaseID is a text field
     #  and only like is allowed for a text field in the where clause 
     #
+    print(coordTempTable)
     results = db.sql('''
         select tc.mgiID, tc.mirbaseID, m.term 
-        from %s tc, ACC_Accession a, MRK_MCV_Cache m
+        from mrkcoord_temp tc, ACC_Accession a, MRK_MCV_Cache m
         where tc.mirbaseID like '%MI%'
         and tc.mgiID = a.accID
         and a._MGIType_key = 2
@@ -879,7 +879,7 @@ def createNonMirnaMarkerReport ():
         and m.qualifier = 'D'
         and m.term != 'miRNA gene'
         order by mgiID
-        ''' % (coordTempTable), 'auto')
+        ''', 'auto')
 
     #
     # Write the records to the report.
