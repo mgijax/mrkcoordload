@@ -1,8 +1,10 @@
+TAG: mrkcoordload-6-0-25-6
 TAG: mrkcoordload-6-0-25-5
-DATE: 02/21/2025
+DATE: 02/21/2025, 02/24/2025
 STAFF: lec
 CHANGES: 
 wts2-1600/e4g-154/Marker Coordinate Load changes : New coordinates
+cleaned up mirbase sql
 
 TAG: mrkcoordload-6-0-25-4
 TAG: mrkcoordload-6-0-25-3

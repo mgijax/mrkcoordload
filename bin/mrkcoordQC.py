@@ -912,35 +912,21 @@ def createMirbaseDeleteReport ():
     print('Create the miRBase delete report')
     fpMirbaseDeleteRpt.write(str.center('miRBase/Marker Deletion Report',108) + NL)
     fpMirbaseDeleteRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
-    fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' %
-                     ('Input MGI ID','Input Symbol','miRBase/Marker Associations To Be Added', 'miRBase/Marker Associations To Be Deleted',NL))
+    fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' % ('Input MGI ID','Input Symbol','miRBase/Marker Associations To Be Added', 'miRBase/Marker Associations To Be Deleted',NL))
     fpMirbaseDeleteRpt.write(16*'-' + '  ' + 16*'-' + '  ' + 60*'-' + '  ' + 60*'-' + NL)
 
-    #
-    # For each marker in the input report mirbase IDs being deleted 
-    # from the database and mirbase IDs being added
-    #
-    db.useOneConnection(1)
-    db.sql('''
-        select a.accid as mgiID, m._Marker_key, m.symbol
-        into temp mkrs
-        from ACC_Accession a, MRK_Marker m
-        where m._Organism_key = 1
-        and m._Marker_Status_key = 1
-        and m._Marker_key = a._Object_key
-        and a._MGIType_key = 2
-        and a._LogicalDB_key = 1
-        and a.prefixPart = 'MGI:' ''', None)
-
-    db.sql('create index idx1 on mkrs(_Marker_key)', None)
-
     results = db.sql('''
-        select m.*, a.accid as mbID
-        from mkrs m 
-        left outer join
-        ACC_Accession a on m._marker_key=a._object_key
+        select a.accid as mbId, m.accid as mgiId, mm.symbol
+        from ACC_Accession a, ACC_Accession m, MRK_Marker mm
         where a._MGIType_key = 2
-        and a._LogicalDB_key = 83''', 'auto')
+        and a._LogicalDB_key = 83
+        and a._object_key = m._object_key
+        and m._mgitype_key = 2
+        and m._logicaldb_key = 1
+        and m.prefixPart = 'MGI:'
+        and m.preferred = 1
+        and a._object_key = mm._marker_key
+        ''', 'auto')
 
     for r in results:
         mgiID = r['mgiID']
@@ -997,8 +983,6 @@ def createMirbaseDeleteReport ():
             numErrors += 1
             fpMirbaseDeleteRpt.write('%-16s  %-16s  %-60s  %-60s%s' % (inputMgiID, symbol, ', '.join(addedMbID), ', '.join(deletedMbID), NL))
 
-    db.sql('drop table mkrs', None)
-    db.useOneConnection(0)
     fpMirbaseDeleteRpt.write(NL + 'Number of Rows: ' + str(numErrors) + NL)
 
     errorCount += numErrors
@@ -1038,8 +1022,7 @@ def createDupMirbaseIdReport():
     return
 
 #
-# Purpose: Create report for miRBase IDs in the input associated with
-#	other markers in the database
+# Purpose: Create report for miRBase IDs in the input associated with other markers in the database
 # Returns: Nothing
 # Assumes: Nothing
 # Effects: Nothing
@@ -1049,27 +1032,18 @@ def createMirbaseOtherMrkReport():
     global errorCount, errorReportNames
 
     print('Create the miRBase ID associated with other marker report')
-    db.useOneConnection(1)
-    db.sql('''
-        select a.accid as mgiID, mm._Marker_key
-        into temp mkrs
-        from ACC_Accession a, MRK_Marker mm, MRK_Location_Cache m
-        where mm._Organism_key = 1
-        and mm._Marker_key =  m._Marker_key
-        and m._Marker_key = a._Object_key
-        and a._MGIType_key = 2
-        and a._LogicalDB_key = 1
-        and a.prefixPart = 'MGI:' ''', None)
-
-    db.sql('create index idx1 on mkrs(_Marker_key)', None)
 
     results = db.sql('''
-        select m.*, a.accid as mbID
-        from mkrs m 
-        left outer join
-         ACC_Accession a on m._marker_key=a._object_key
+        select a.accid as mbId, m.accid as mgiId
+        from ACC_Accession a, ACC_Accession m
         where a._MGIType_key = 2
-        and a._LogicalDB_key = 83''', 'auto')
+        and a._LogicalDB_key = 83
+        and a._object_key = m._object_key
+        and m._mgitype_key = 2
+        and m._logicaldb_key = 1
+        and m.prefixPart = 'MGI:'
+        and m.preferred = 1
+        ''', 'auto')
 
     for r in results:
         mbID = r['mbID']
@@ -1077,10 +1051,6 @@ def createMirbaseOtherMrkReport():
         if mbID not in mb2mgiInDbDict:
             mb2mgiInDbDict[mbID] = []
         mb2mgiInDbDict[mbID].append(mgiID)
-
-    print('Create the miRBase IDs associated with other markers report')
-    db.sql('drop table mkrs', None)
-    db.useOneConnection(0)
 
     fpMirbaseOtherMrkRpt.write(str.center('miRBase IDs in the Input Associated with Different Markers in MGI Report',108) + NL)
     fpMirbaseOtherMrkRpt.write(str.center('(' + timestamp + ')',108) + 2*NL)
