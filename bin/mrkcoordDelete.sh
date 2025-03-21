@@ -100,6 +100,20 @@ checkStatus ${STAT} "mrkcoordDelete.py"
 #
 touch ${LASTRUN_FILE}
 
+# If reloading gene models, remove lastrun so that the snpcacheload will run from the Pipeline
+# Remove snpcacheload/output/lastrun so that the snpcacheload will run from the Pipeline
+case `uname -n` in
+bhmgiapp01)
+       echo "removing mgiadmin@bhmgidb03lp rm -rf /data/loads/mgi/snpcacheload/output/lastrun" | tee -a ${LOG}
+       ssh mgiadmin@bhmgidb03lp 'rm -rf /data/loads/mgi/snpcacheload/output/lastrun'
+       ;;
+bhmgidevapp01)
+       echo "removing mgiadmin@bhmgidb05ld rm -rf /data/loads/mgi/snpcacheload/output/lastrun" | tee -a ${LOG}
+       ssh mgiadmin@bhmgidb05ld 'rm -rf /data/loads/mgi/snpcacheload/output/lastrun'
+       ;;
+*) ;;
+esac
+
 #
 # run postload cleanup and email logs
 #
